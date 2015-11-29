@@ -1,7 +1,7 @@
 import unittest
 import wepub
 
-test_html = """<html>
+TEST_HTML = """<html>
 <head>
     <title>This is a test</title>
 </head>
@@ -11,7 +11,7 @@ test_html = """<html>
 <p>This is some text in the chapter.</p>
 <p>This is another paragraph.</p>
 </div>
-<a id="next-chapter" href="next-chapter.html">Next Chapter</a>
+<a id="next-chapter" href="chapter.html">Next Chapter</a>
 </body>
 </html>"""
 
@@ -22,7 +22,7 @@ class TestChapter(wepub.Chapter):
         super().__init__(url, html)
 
     def get_title(self):
-        return self.parsed_html.h1
+        return self.parsed_html.h1.string
 
     def get_content(self):
         return self.parsed_html("div", id="content")
@@ -32,8 +32,10 @@ class TestChapter(wepub.Chapter):
 
 
 class MyTestCase(unittest.TestCase):
-    def test_something(self):
-        self.assertEqual(True, False)
+    def test_test_chapter(self):
+        test_chapter = TestChapter("chapter.html", TEST_HTML)
+        self.assertEqual(test_chapter.title, "Chapter Title")
+        self.assertEqual(test_chapter.next_chapter_url, "chapter.html")
 
 
 if __name__ == '__main__':
