@@ -21,3 +21,10 @@ class HPMoR(wepub.Chapter):
         return None if anchor is None else self.fix_url(anchor["href"])
 
 
+def generate_epub(path=None):
+    book = wepub.Book(
+                      chapter_type=HPMoR,
+                      init_url="http://hpmor.com/chapter/1",
+                      title="Harry Potter and the Methods of Rationality",
+                      author="Eliezer Yudkowsky")
+    return wepub.EPub(book, path=path)
