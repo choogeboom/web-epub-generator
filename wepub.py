@@ -1,6 +1,8 @@
 import urllib.request
 import urllib.parse
 import copy
+import os
+import re
 
 import bs4
 
@@ -109,9 +111,11 @@ class Book:
     An iterable class for chapters in the Web Series
     """
 
-    def __init__(self, chapter_type, init_url):
+    def __init__(self, chapter_type, init_url, title=None, author=None):
         self.chapter_type = chapter_type
         self.init_url = init_url
+        self.title = title
+        self.author = author
 
     def __iter__(self):
         self.current_chapter = None
@@ -126,5 +130,71 @@ class Book:
                 raise StopIteration
             self.current_chapter = self.chapter_type(next_url)
         return self.current_chapter
+
+
+class EPub:
+    """
+    A class for building an ePub from a Book object
+
+    The EPUB container is a zip file with the following example structure
+
+    --ZIP Container--
+    mimetype
+    META-INF/
+        container.xml
+    EPUB/
+        content.opf
+        Text/
+            chapter1.xhtml
+        Images/
+            ch1-pic.png
+        Styles/
+            style.css
+            myfont.otf
+        toc.ncx
+    """
+
+    def __init__(self, book, path=None):
+        self.book = book
+        if path is None:
+            self.path = os.path.expanduser('~/generated_epubs')
+        else:
+            self.path = os.path.expanduser(path)
+
+    def create_directory_structure(self):
+        for directory in self.directories:
+            os.makedirs(directory, exist_ok=True)
+
+    @property
+    def directories(self):
+        return [self.root_dir, self.meta_inf_dir, self.epub_dir, self.text_dir, self.images_dir, self.styles_dir]
+
+    @property
+    def root_dir(self):
+        title = self.book.title.casefold()
+        return "{}/{}".format(self.path, re.sub("[^a-z0-9]", "_", title))
+
+    @property
+    def meta_inf_dir(self):
+        return "{}/{}".format(self.root_dir, "META-INF")
+
+    @property
+    def epub_dir(self):
+        return "{}/{}".format(self.root_dir, "EPUB")
+
+    @property
+    def text_dir(self):
+        return "{}/{}".format(self.epub_dir, "Text")
+
+    @property
+    def images_dir(self):
+        return "{}/{}".format(self.epub_dir, "Images")
+
+    @property
+    def styles_dir(self):
+        return "{}/{}".format(self.epub_dir, "Styles")
+
+
+
 
 
