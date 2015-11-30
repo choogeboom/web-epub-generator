@@ -2,6 +2,7 @@ import urllib.request
 import urllib.parse
 import copy
 import os
+import shutil
 import re
 
 import bs4
@@ -20,6 +21,11 @@ def load_html(url: str) -> str:
     with urllib.request.urlopen(url) as response:
         html = response.read()
     return html.decode('utf-8')
+
+
+def read_file(file_name: str) -> str:
+    with open(file_name, 'r') as file:
+        return file.read()
 
 
 class Chapter:
@@ -132,6 +138,7 @@ class Book:
         return self.current_chapter
 
 
+# noinspection SpellCheckingInspection
 class EPub:
     """
     A class for building an ePub from a Book object
@@ -142,7 +149,7 @@ class EPub:
     mimetype
     META-INF/
         container.xml
-    EPUB/
+    CONTENT/
         content.opf
         Text/
             chapter1.xhtml
@@ -160,14 +167,53 @@ class EPub:
             self.path = os.path.expanduser('~/generated_epubs')
         else:
             self.path = os.path.expanduser(path)
+        self.container = None
+        self.initialize_container()
+        self.content = None
+
+    def initialize_container(self):
+        container_init = read_file("templates/container.xml")
+        self.container = bs4.BeautifulSoup(container_init, "xml")
+
+    def initialize_package_document(self):
+        pass
+
+    def generate(self):
+        self.create_directory_structure()
+        self.write_mimetype()
+        self.process_chapters()
+        self.write_container()
 
     def create_directory_structure(self):
         for directory in self.directories:
             os.makedirs(directory, exist_ok=True)
 
+    def write_mimetype(self):
+        mimetype_file = "{}/{}".format(self.path, "mimetype")
+        with open(mimetype_file, 'w') as f:
+            print("application/epub+zip", file=f)
+
+    def write_container(self):
+        container_file = "{}/{}".format(self.meta_inf_dir, "container.xml")
+        with open(container_file, 'w') as f:
+            print(self.container.prettify(formatter="xml"), file=f)
+
+    def clean_up(self):
+        shutil.rmtree(self.root_dir, ignore_errors=True)
+
+    def process_chapters(self):
+        for chapter_num, chapter in enumerate(self.book, start=1):
+            chapter_path = "{}/chapter_{}.xhtml".format(self.text_dir, chapter_num)
+            chapter.write(chapter_path)
+
     @property
     def directories(self):
-        return [self.root_dir, self.meta_inf_dir, self.epub_dir, self.text_dir, self.images_dir, self.styles_dir]
+        return [self.root_dir,
+                self.meta_inf_dir,
+                self.content_dir,
+                self.text_dir,
+                self.images_dir,
+                self.styles_dir]
 
     @property
     def root_dir(self):
@@ -179,20 +225,20 @@ class EPub:
         return "{}/{}".format(self.root_dir, "META-INF")
 
     @property
-    def epub_dir(self):
-        return "{}/{}".format(self.root_dir, "EPUB")
+    def content_dir(self):
+        return "{}/{}".format(self.root_dir, "CONTENT")
 
     @property
     def text_dir(self):
-        return "{}/{}".format(self.epub_dir, "Text")
+        return "{}/{}".format(self.content_dir, "Text")
 
     @property
     def images_dir(self):
-        return "{}/{}".format(self.epub_dir, "Images")
+        return "{}/{}".format(self.content_dir, "Images")
 
     @property
     def styles_dir(self):
-        return "{}/{}".format(self.epub_dir, "Styles")
+        return "{}/{}".format(self.content_dir, "Styles")
 
 
 
