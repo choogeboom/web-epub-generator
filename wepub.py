@@ -169,14 +169,15 @@ class EPub:
             self.path = os.path.expanduser(path)
         self.container = None
         self.initialize_container()
-        self.content = None
+        self.package = None
 
     def initialize_container(self):
         container_init = read_file("templates/container.xml")
         self.container = bs4.BeautifulSoup(container_init, "xml")
 
     def initialize_package_document(self):
-        pass
+        package_init = read_file("templates/package.ocf")
+        self.package = bs4.BeautifulSoup(package_init, "xml")
 
     def generate(self):
         self.create_directory_structure()

@@ -1,13 +1,8 @@
 """
-This is me just messing around with the EPUB specification. I plan to eventually build
-this into a full library for creating and editing EPUB files.
+For building and editing EPUB books
 """
-
 import bs4
-
-
-"""The mimetype string for EPUB version 3.0"""
-MIMETYPE = "application/epub+zip"
+from epub import meta
 
 
 class Container:
@@ -53,7 +48,19 @@ class Container:
 
 
 class PackageDocument:
-    pass
+
+    def __init__(self):
+        self.version = "3.0"
+        self.unique_identifier = "BookID"
+        self.prefix = None
+        self.language = None
+        self.text_direction = None
+        self.id = None
+        self.meta_data = meta.MetaData()
+        self.manifest = Manifest()
+        self.spine = Spine()
+        self.bindings = None
+        self.collection = []
 
 
 class EPub:
@@ -63,10 +70,8 @@ class EPub:
 
     @property
     def mimetype(self):
-        return MIMETYPE
+        return "application/epub+zip"
 
     @property
     def version(self):
         return "3.0.1"
-
-

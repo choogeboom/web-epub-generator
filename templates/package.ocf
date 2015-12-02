@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package xmlns="http://www.idpf.org/2007/opf" unique-identifier="BookID" version="3.0">
+    <metadata xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:opf="http://www.idpf.org/2007/opf">
+        <dc:date opf:event="modification">1973-08-16</dc:date>
+        <dc:title></dc:title>
+        <dc:creator opf:role="aut">Terry Pratchett</dc:creator>
+        <dc:date opf:event="creation">1973-08-16</dc:date>
+        <dc:language>en-US</dc:language>
+        <dc:identifier id="BookID" opf:scheme="UUID">a</dc:identifier>
+        <meta name="Sigil version" content="0.2.3"/>
+    </metadata>
+    <manifest>
+        <item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/>
+        <item id="discworld-01-colour-of-magic-uk.jpg" href="Images/discworld-01-colour-of-magic-uk.jpg" media-type="image/jpeg"/>
+        <item id="ch1.xhtml" href="Text/ch1.xhtml" media-type="application/xhtml+xml"/>
+        <item id="ch1prologue.xhtml" href="Text/ch1prologue.xhtml" media-type="application/xhtml+xml"/>
+        <item id="ch2.xhtml" href="Text/ch2.xhtml" media-type="application/xhtml+xml"/>
+        <item id="ch2prologue.xhtml" href="Text/ch2prologue.xhtml" media-type="application/xhtml+xml"/>
+        <item id="ch3.xhtml" href="Text/ch3.xhtml" media-type="application/xhtml+xml"/>
+        <item id="ch4.xhtml" href="Text/ch4.xhtml" media-type="application/xhtml+xml"/>
+        <item id="cover.xhtml" href="Text/cover.xhtml" media-type="application/xhtml+xml"/>
+        <item id="endnotes.xhtml" href="Text/endnotes.xhtml" media-type="application/xhtml+xml"/>
+        <item id="part3.xhtml" href="Text/part3.xhtml" media-type="application/xhtml+xml"/>
+        <item id="title.xhtml" href="Text/title.xhtml" media-type="application/xhtml+xml"/>
+    </manifest>
+    <spine toc="ncx">
+        <itemref idref="cover.xhtml"/>
+        <itemref idref="title.xhtml"/>
+        <itemref idref="ch1prologue.xhtml"/>
+        <itemref idref="ch1.xhtml"/>
+        <itemref idref="ch2prologue.xhtml"/>
+        <itemref idref="ch2.xhtml"/>
+        <itemref idref="ch3.xhtml"/>
+        <itemref idref="ch4.xhtml"/>
+        <itemref idref="part3.xhtml"/>
+        <itemref idref="endnotes.xhtml"/>
+    </spine>
+    <guide>
+        <reference type="cover" title="Cover" href="Text/cover.xhtml"/>
+        <reference type="title-page" title="Title Page" href="Text/title.xhtml"/>
+        <reference type="notes" title="Notes" href="Text/endnotes.xhtml"/>
+    </guide>
+</package>
