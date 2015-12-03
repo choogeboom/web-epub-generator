@@ -2,9 +2,9 @@
 Contains all classes and functions related to EPUB meta-data
 """
 import datetime
+import bs4
+from epub import util
 
-from abc import abstractmethod
-from abc import ABCMeta
 
 class MetaData:
     def __init__(self, titles=None, languages=None, identifiers=None):
@@ -26,22 +26,136 @@ class MetaData:
         self.collections = []
         self.modified = datetime.date.today()
 
+    def append_to_document(self, parent=None):
+        """
+        Add the meta data object to the document as a child of the specified parent
 
-class MetaDataProperty(metaclass=ABCMeta):
+        :param parent: the parent tag of the meta data object
+        :return: The document object
+        """
+        if parent is None:
+            soup = bs4.BeautifulSoup("<package/>", "xml")
+            parent = soup.package
+        else:
+            soup = util.get_soup(parent)
+
+        tag = soup.new_tag("metadata")
+        parent.append(tag)
+        for contributor in self.contributors:
+            contributor.append_to_document(parent=tag)
+        for coverage in self.coverages:
+            coverage.append_to_document(parent=tag)
+        for creator in self.creators:
+            creator.append_to_document(parent=tag)
+        for date in self.dates:
+            date.append_to_document(parent=tag)
+        for description in self.descriptions:
+            description.append_to_document(parent=tag)
+        for fmt in self.formats:
+            fmt.append_to_document(parent=tag)
+        for identifier in self.identifiers:
+            identifier.append_to_document(parent=tag)
+        for language in self.languages:
+            language.append_to_document(parent=tag)
+        for publisher in self.publishers:
+            publisher.append_to_document(parent=tag)
+        for relation in self.relations:
+            relation.append_to_document(parent=tag)
+        for right in self.rights:
+            right.append_to_document(parent=tag)
+        for source in self.sources:
+            source.append_to_document(parent=tag)
+        for subject in self.subjects:
+            subject.append_to_document(parent=tag)
+        for tp in self.types:
+            tp.append_to_document(parent=tag)
+        for title in self.titles:
+            title.append_to_document(parent=tag)
+        for collection in self.collections:
+            collection.append_to_document(parent=tag)
+        modified_tag = soup.new_tag("meta")
+        modified_tag["property"] = "dcterms:modified"
+        modified_tag.append(bs4.NavigableString(self.modified.isoformat()))
+        tag.append(modified_tag)
+
+        return tag, soup
+
+
+class MetaDataProperty:
     """
     Base class for all meta-data items
     """
     def __init__(self):
         self.value = ""
-        self.id = ""
+        self.id = util.generate_random_string(12)
         self.file_as = None
         self.alternative_script = None
         self.display_seq = None
         self.meta_authority = None
+        self.main_tag_name = "default"
 
-    @abstractmethod
-    def to_tag(self):
-        pass
+    @staticmethod
+    def get_parent_and_soup(parent):
+        if parent is None:
+            soup = bs4.BeautifulSoup("<package><metadata/></package>", "xml")
+            parent = soup.package.metadata
+        else:
+            soup = util.get_soup(parent)
+        return parent, soup
+
+    def append_to_document(self, parent=None):
+        parent, soup = MetaDataProperty.get_parent_and_soup(parent)
+        self.append_main_tag(parent, soup)
+        self.append_alternative_script(parent, soup)
+        self.append_display_seq(parent, soup)
+        self.append_file_as(parent, soup)
+        self.append_meta_authority(parent, soup)
+        return parent, soup
+
+    def append_main_tag(self, parent, soup):
+        main_tag = soup.new_tag(self.main_tag_name)
+        main_tag.append(bs4.NavigableString(self.value))
+        parent.append(main_tag)
+        if self.id is not None:
+            main_tag["id"] = self.id
+        return main_tag
+
+    def append_alternative_script(self, parent, soup):
+        if self.alternative_script is None:
+            return
+        as_tag = soup.new_tag(
+                              name="meta",
+                              property="alternative-script",
+                              refines=self.id)
+        parent.append(as_tag)
+        as_tag.append(bs4.NavigableString(self.alternative_script))
+
+    def append_display_seq(self, parent, soup):
+        if self.display_seq is None:
+            return
+        tag = soup.new_tag(
+                           name="meta",
+                           property="display-seq",
+                           refines=self.id)
+        parent.append(tag)
+        tag.append(bs4.NavigableString(str(self.display_seq)))
+
+    def append_file_as(self, parent, soup):
+        if self.file_as is None:
+            return
+        tag = soup.new_tag(
+                           name="meta",
+                           property="file-as",
+                           refines=self.id)
+        parent.append(tag)
+        tag.append(bs4.NavigableString(self.file_as))
+
+    def append_meta_authority(self, parent, soup):
+        if self.meta_authority is None:
+            return
+        tag = soup.new_tag(name="meta", property="meta-auth", refines=self.id)
+        parent.append(tag)
+        tag.append(bs4.NavigableString(self.meta_authority))
 
 
 class Person(MetaDataProperty):
@@ -51,10 +165,22 @@ class Person(MetaDataProperty):
     def __init__(self):
         super().__init__()
         self.role = None
+        self.role_scheme = None
+        self.main_tag_name = 'person'
 
-    @abstractmethod
-    def to_tag(self):
-        pass
+    def append_to_document(self, parent=None):
+        parent, soup = super().append_to_document(parent)
+        self.append_role(parent, soup)
+        return parent, soup
+
+    def append_role(self, parent, soup):
+        if self.role is None:
+            return
+        tag = soup.new_tag(name="meta", property="role", refines=self.id)
+        parent.append(tag)
+        if self.role_scheme is not None:
+            tag["scheme"] = self.role_scheme
+        tag.append(bs4.NavigableString(self.role))
 
 
 class Collection(MetaDataProperty):
@@ -63,13 +189,57 @@ class Collection(MetaDataProperty):
     """
     def __init__(self):
         super().__init__()
+        self.main_tag_name = 'meta'
         self.type = None
         self.group_position = None
         self.identifier = None
-        self.collections = []
+        self.collection = None
+        self.refines_id = None
 
-    def to_tag(self):
-        pass
+    def append_to_document(self, parent=None):
+        parent, soup = super().append_to_document(parent)
+        self.append_type(parent, soup)
+        self.append_group_position(parent, soup)
+        self.append_identifier(parent, soup)
+        self.append_collection(parent, soup)
+
+    def append_main_tag(self, parent, soup):
+        main_tag = soup.new_tag("meta", property="belongs-to-collection")
+        main_tag.append(bs4.NavigableString(self.value))
+        parent.append(main_tag)
+        if self.id is not None:
+            main_tag["id"] = self.id
+        if self.refines_id is not None:
+            main_tag["refines"] = self.refines_id
+        return main_tag
+
+    def append_type(self, parent, soup):
+        if self.type is None:
+            return
+        tag = soup.new_tag(name="meta", property="collection-type", refines=self.id)
+        tag.append(bs4.NavigableString(self.type))
+        parent.append(tag)
+
+    def append_group_position(self, parent, soup):
+        if self.group_position is None:
+            return
+        tag = soup.new_tag(name="meta", property="group-position", refines=self.id)
+        tag.append(bs4.NavigableString(str(self.group_position)))
+        parent.append(tag)
+
+    def append_identifier(self, parent, soup):
+        if self.identifier is None:
+            return
+        tag = soup.new_tag(name="meta", property="dcterms:identifier", refines=self.id)
+        tag.append(bs4.NavigableString(self.identifier))
+        parent.append(tag)
+
+    def append_collection(self, parent, soup):
+        if self.collection is None:
+            return
+        self.collection.refines_id = self.id
+        self.collection.append_to_document(parent)
+
 
 
 class Contributor(Person):
@@ -84,7 +254,7 @@ class Contributor(Person):
     def __init__(self):
         super().__init__()
 
-    def to_tag(self):
+    def append_to_document(self, parent=None):
         pass
 
 
@@ -291,9 +461,23 @@ class Title(MetaDataProperty):
     def __init__(self):
         super().__init__()
         self.type = None
+        self.main_tag_name = "dc:title"
 
-    def to_tag(self):
-        pass
+    def append_to_document(self, parent=None):
+        parent, soup = MetaDataProperty.get_parent_and_soup(parent)
+        tag = soup.new_tag("title", nsprefix="dc")
+        if self.id is not None:
+            tag["id"] = self.id
+        parent.append(tag)
+        tag.append(bs4.NavigableString(self.value))
+        if self.type is not None:
+            tag = soup.new_tag(
+                               "meta",
+                               refines=self.id,
+                               property="title-type")
+            parent.append(tag)
+            tag.append(bs4.NavigableString(self.type))
+        return tag, soup
 
 
 class Type(MetaDataProperty):
