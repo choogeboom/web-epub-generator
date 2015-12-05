@@ -114,7 +114,7 @@ class MetaDataProperty:
 
     def append_main_tag(self, parent, soup):
         main_tag = soup.new_tag(self._main_tag_name)
-        main_tag.append(bs4.NavigableString(self.value))
+        main_tag.append(bs4.NavigableString(self.value_string))
         parent.append(main_tag)
         if self.id is not None:
             main_tag["id"] = self.id
@@ -156,6 +156,10 @@ class MetaDataProperty:
         tag = soup.new_tag(name="meta", property="meta-auth", refines=self.id)
         parent.append(tag)
         tag.append(bs4.NavigableString(self.meta_authority))
+
+    @property
+    def value_string(self):
+        return str(self.value)
 
 
 class Person(MetaDataProperty):
@@ -303,9 +307,11 @@ class Date(MetaDataProperty):
     """
     def __init__(self):
         super().__init__()
+        self._main_tag_name = 'dc:date'
 
-    def to_tag(self):
-        pass
+    @property
+    def value_string(self):
+        return self.value.isoformat()
 
 
 class Description(MetaDataProperty):
@@ -318,9 +324,6 @@ class Description(MetaDataProperty):
     """
     def __init__(self):
         super().__init__()
-
-    def to_tag(self):
-        pass
 
 
 class Format(MetaDataProperty):

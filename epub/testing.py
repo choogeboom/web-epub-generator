@@ -1,6 +1,7 @@
 import unittest
 import bs4
 import string
+import datetime
 from epub import meta
 from epub import util
 
@@ -309,6 +310,22 @@ class MetaCreatorTest(unittest.TestCase):
               '<meta property="role" refines="test-id" scheme="marc:relators">' \
               'aut' \
               '</meta>' \
+              '</metadata>'
+        self.assertEqual(xml, str(self.parent))
+
+
+class MetaDateTest(unittest.TestCase):
+    def setUp(self):
+        self.meta = meta.Date()
+        self.meta.id = None
+        self.meta.value = datetime.datetime(1983, 11, 16)
+        self.soup = bs4.BeautifulSoup("<package><metadata/></package>", "xml")
+        self.parent = self.soup.package.metadata
+
+    def test_basic(self):
+        self.meta.append_to_document(self.parent)
+        xml = '<metadata>' \
+              '<dc:date>1983-11-16T00:00:00</dc:date>' \
               '</metadata>'
         self.assertEqual(xml, str(self.parent))
 
