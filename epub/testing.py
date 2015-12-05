@@ -106,7 +106,7 @@ class MetaDataPropertyTest(unittest.TestCase):
         self.assertEqual(xml, str(self.parent))
 
 
-class PersonTest(unittest.TestCase):
+class MetaPersonTest(unittest.TestCase):
     def setUp(self):
         self.person = meta.Person()
         self.person.id = 'test-id'
@@ -146,7 +146,7 @@ class PersonTest(unittest.TestCase):
         self.assertEqual(xml, str(self.parent))
 
 
-class CollectionTest(unittest.TestCase):
+class MetaCollectionTest(unittest.TestCase):
     def setUp(self):
         self.coll = meta.Collection()
         self.coll.value = 'Test Value'
@@ -210,6 +210,46 @@ class CollectionTest(unittest.TestCase):
               '<meta id="other-id" property="belongs-to-collection" ' \
               'refines="test-id">Other Value</meta>' \
               '<meta property="dcterms:identifier" refines="other-id">identifier</meta>' \
+              '</metadata>'
+        self.assertEqual(xml, str(self.parent))
+
+
+class MetaContributorTest(unittest.TestCase):
+    def setUp(self):
+        self.main = meta.Contributor()
+        self.main.id = 'test-id'
+        self.main.value = 'John Doe'
+        self.soup = bs4.BeautifulSoup("<package><metadata/></package>", "xml")
+        self.parent = self.soup.package.metadata
+
+    def test_basic(self):
+        self.main.id = None
+        self.main.append_to_document(self.parent)
+        xml = '<metadata>' \
+              '<dc:contributor>John Doe</dc:contributor>' \
+              '</metadata>'
+        self.assertEqual(xml, str(self.parent))
+
+    def test_role(self):
+        self.main.role = 'Author'
+        self.main.append_to_document(self.parent)
+        xml = '<metadata>' \
+              '<dc:contributor id="test-id">John Doe</dc:contributor>' \
+              '<meta property="role" refines="test-id">' \
+              'Author' \
+              '</meta>' \
+              '</metadata>'
+        self.assertEqual(xml, str(self.parent))
+
+    def test_role_scheme(self):
+        self.main.role = 'aut'
+        self.main.role_scheme = 'marc:relators'
+        self.main.append_to_document(self.parent)
+        xml = '<metadata>' \
+              '<dc:contributor id="test-id">John Doe</dc:contributor>' \
+              '<meta property="role" refines="test-id" scheme="marc:relators">' \
+              'aut' \
+              '</meta>' \
               '</metadata>'
         self.assertEqual(xml, str(self.parent))
 

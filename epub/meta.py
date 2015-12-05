@@ -201,7 +201,7 @@ class Collection(MetaDataProperty):
         self.append_type(parent, soup)
         self.append_group_position(parent, soup)
         self.append_identifier(parent, soup)
-        self.append_collection(parent, soup)
+        self.append_collection(parent)
 
     def append_main_tag(self, parent, soup):
         main_tag = soup.new_tag("meta", property="belongs-to-collection")
@@ -234,12 +234,11 @@ class Collection(MetaDataProperty):
         tag.append(bs4.NavigableString(self.identifier))
         parent.append(tag)
 
-    def append_collection(self, parent, soup):
+    def append_collection(self, parent):
         if self.collection is None:
             return
         self.collection.refines_id = self.id
         self.collection.append_to_document(parent)
-
 
 
 class Contributor(Person):
@@ -253,9 +252,10 @@ class Contributor(Person):
 
     def __init__(self):
         super().__init__()
+        self.main_tag_name = 'dc:contributor'
 
     def append_to_document(self, parent=None):
-        pass
+        super().append_to_document(parent)
 
 
 class Coverage(MetaDataProperty):
