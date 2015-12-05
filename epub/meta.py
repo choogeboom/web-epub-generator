@@ -24,7 +24,7 @@ class MetaData:
         self.types = []
         self.titles = titles if titles else [Title()]
         self.collections = []
-        self.modified = datetime.date.today()
+        self.modified = datetime.datetime.today()
 
     def append_to_document(self, parent=None):
         """
@@ -40,6 +40,7 @@ class MetaData:
             soup = util.get_soup(parent)
 
         tag = soup.new_tag("metadata")
+        tag["xmlns:dc"] = "http://purl.org/dc/elements/1.1/"
         parent.append(tag)
         for contributor in self.contributors:
             contributor.append_to_document(parent=tag)

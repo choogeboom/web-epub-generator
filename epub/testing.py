@@ -536,7 +536,7 @@ class MetaTitleTest(unittest.TestCase):
         self.assertEqual(xml, str(self.parent))
 
 
-class MetaSubjectTest(unittest.TestCase):
+class MetaTypeTest(unittest.TestCase):
     def setUp(self):
         self.meta = meta.Type()
         self.meta.id = None
@@ -550,6 +550,58 @@ class MetaSubjectTest(unittest.TestCase):
               '<dc:type>Test</dc:type>' \
               '</metadata>'
         self.assertEqual(xml, str(self.parent))
+
+
+class MetaDataTest(unittest.TestCase):
+    def setUp(self):
+        self.meta = meta.MetaData()
+        self.meta.identifiers[0].value = 'identifier'
+        self.meta.identifiers[0].id = "identifier-id"
+        self.meta.languages[0].value = 'en-US'
+        self.meta.languages[0].id = "language-id"
+        self.meta.titles[0].value = "Test Title"
+        self.meta.titles[0].id = "title-id"
+        self.meta.modified = datetime.datetime(1987, 6, 5)
+        self.soup = bs4.BeautifulSoup("<package/>", "xml")
+        self.parent = self.soup.package
+
+    def test_basic(self):
+        self.meta.append_to_document(self.parent)
+        xml = '<package>' \
+              '<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">' \
+              '<dc:identifier id="identifier-id">identifier</dc:identifier>' \
+              '<dc:language id="language-id">en-US</dc:language>' \
+              '<dc:title id="title-id">Test Title</dc:title>' \
+              '<meta property="dcterms:modified">1987-06-05T00:00:00</meta>' \
+              '</metadata>' \
+              '</package>'
+        self.assertEqual(xml, str(self.parent))
+
+    def test_contributor(self):
+        contributor = meta.Contributor()
+        contributor.value = 'Bob'
+        contributor.role = 'Illustrator'
+        contributor.id = 'contributor-id'
+        self.meta.contributors.append(contributor)
+        self.meta.append_to_document(self.parent)
+        xml = '<package>' \
+              '<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">' \
+              '<dc:contributor id="contributor-id">' \
+              'Bob' \
+              '</dc:contributor>' \
+              '<meta property="role" refines="contributor-id">' \
+              'Illustrator' \
+              '</meta>' \
+              '<dc:identifier id="identifier-id">identifier</dc:identifier>' \
+              '<dc:language id="language-id">en-US</dc:language>' \
+              '<dc:title id="title-id">Test Title</dc:title>' \
+              '<meta property="dcterms:modified">1987-06-05T00:00:00</meta>' \
+              '</metadata>' \
+              '</package>'
+        self.assertEqual(xml, str(self.parent))
+
+    def test_multiple_contributors(self):
+        pass
 
 if __name__ == '__main__':
     unittest.main()
