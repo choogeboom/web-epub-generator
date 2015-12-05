@@ -6,25 +6,26 @@ import bs4
 from epub import util
 
 
-class MetaData:
-    def __init__(self, titles=None, languages=None, identifiers=None):
+class MetaData(util.SetGet):
+    def __init__(self, **kwargs):
         self.contributors = []
         self.coverages = []
         self.creators = []
         self.dates = []
         self.descriptions = []
         self.formats = []
-        self.identifiers = identifiers if identifiers else [Identifier()]
-        self.languages = languages if languages else [Language()]
+        self.identifiers = [Identifier()]
+        self.languages = [Language()]
         self.publishers = []
         self.relations = []
         self.rights = []
         self.sources = []
         self.subjects = []
         self.types = []
-        self.titles = titles if titles else [Title()]
+        self.titles = [Title()]
         self.collections = []
         self.modified = datetime.datetime.today()
+        self.set(**kwargs)
 
     def append_to_document(self, parent=None):
         """
@@ -82,18 +83,21 @@ class MetaData:
         return tag, soup
 
 
-class MetaDataProperty:
+class MetaDataProperty(util.SetGet):
     """
     Base class for all meta-data items
     """
-    def __init__(self):
+
+    _main_tag_name = 'default'
+
+    def __init__(self, **kwargs):
         self.value = ""
         self.id = util.generate_random_string(12)
         self.file_as = None
         self.alternative_script = None
         self.display_seq = None
         self.meta_authority = None
-        self._main_tag_name = "default"
+        self.set(**kwargs)
 
     @staticmethod
     def get_parent_and_soup(parent):
@@ -167,11 +171,13 @@ class Person(MetaDataProperty):
     """
     Base class for Creator and Contributor
     """
-    def __init__(self):
-        super().__init__()
+
+    _main_tag_name = 'person'
+
+    def __init__(self, **kwargs):
         self.role = None
         self.role_scheme = None
-        self._main_tag_name = 'person'
+        super().__init__(**kwargs)
 
     def append_to_document(self, parent=None):
         parent, soup = super().append_to_document(parent)
@@ -192,14 +198,16 @@ class Collection(MetaDataProperty):
     """
     identifies the name of a collection to which the EPUB Publication belongs.
     """
-    def __init__(self):
-        super().__init__()
-        self._main_tag_name = 'meta'
+
+    _main_tag_name = 'meta'
+
+    def __init__(self, **kwargs):
         self.type = None
         self.group_position = None
         self.identifier = None
         self.collection = None
         self.refines_id = None
+        super().__init__(**kwargs)
 
     def append_to_document(self, parent=None):
         parent, soup = super().append_to_document(parent)
@@ -255,12 +263,10 @@ class Contributor(Person):
                 entity.
     """
 
-    def __init__(self):
-        super().__init__()
-        self._main_tag_name = 'dc:contributor'
+    _main_tag_name = 'dc:contributor'
 
-    def append_to_document(self, parent=None):
-        super().append_to_document(parent)
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
 
 class Coverage(MetaDataProperty):
@@ -279,9 +285,11 @@ class Coverage(MetaDataProperty):
 
     References:	[TGN] http://www.getty.edu/research/tools/vocabulary/tgn/index.html
     """
-    def __init__(self):
-        super().__init__()
-        self._main_tag_name = 'dc:coverage'
+
+    _main_tag_name = 'dc:coverage'
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
 
 class Creator(Person):
@@ -291,9 +299,11 @@ class Creator(Person):
     Comment:    Examples of a Creator include a person, an organization, or a service.
                 Typically, the name of a Creator should be used to indicate the entity.
     """
-    def __init__(self):
-        super().__init__()
-        self._main_tag_name = 'dc:creator'
+
+    _main_tag_name = 'dc:creator'
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
 
 class Date(MetaDataProperty):
@@ -306,9 +316,11 @@ class Date(MetaDataProperty):
 
     References:	[W3CDTF] http://www.w3.org/TR/NOTE-datetime
     """
-    def __init__(self):
-        super().__init__()
-        self._main_tag_name = 'dc:date'
+
+    _main_tag_name = 'dc:date'
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
     @property
     def value_string(self):
@@ -323,9 +335,11 @@ class Description(MetaDataProperty):
                 contents, a graphical representation, or a free-text account of the
                 resource.
     """
-    def __init__(self):
-        super().__init__()
-        self._main_tag_name = 'dc:description'
+
+    _main_tag_name = 'dc:description'
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
 
 class Format(MetaDataProperty):
@@ -338,9 +352,11 @@ class Format(MetaDataProperty):
 
     References:	[MIME] http://www.iana.org/assignments/media-types/
     """
-    def __init__(self):
-        super().__init__()
-        self._main_tag_name = 'dc:format'
+
+    _main_tag_name = 'dc:format'
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
 
 class Identifier(MetaDataProperty):
@@ -350,11 +366,13 @@ class Identifier(MetaDataProperty):
     Comment:	Recommended best practice is to identify the resource by means of a
                 string conforming to a formal identification system.
     """
-    def __init__(self):
-        super().__init__()
-        self._main_tag_name = 'dc:identifier'
+
+    _main_tag_name = 'dc:identifier'
+
+    def __init__(self, **kwargs):
         self.type = None
         self.scheme = None
+        super().__init__(**kwargs)
 
     def append_to_document(self, parent=None):
         parent, soup = super().append_to_document(parent)
@@ -381,9 +399,11 @@ class Language(MetaDataProperty):
     References:	[RFC4646] http://www.ietf.org/rfc/rfc4646.txt
                 https://tools.ietf.org/html/rfc5646
     """
-    def __init__(self):
-        super().__init__()
-        self._main_tag_name = 'dc:language'
+
+    _main_tag_name = 'dc:language'
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
 
 class Publisher(MetaDataProperty):
@@ -393,9 +413,11 @@ class Publisher(MetaDataProperty):
     Comment:	Examples of a Publisher include a person, an organization, or a service.
                 Typically, the name of a Publisher should be used to indicate the entity.
     """
-    def __init__(self):
-        super().__init__()
-        self._main_tag_name = 'dc:publisher'
+
+    _main_tag_name = 'dc:publisher'
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
 
 class Relation(MetaDataProperty):
@@ -405,9 +427,11 @@ class Relation(MetaDataProperty):
     Comment:	Recommended best practice is to identify the related resource by means of
                 a string conforming to a formal identification system.
     """
-    def __init__(self):
-        super().__init__()
-        self._main_tag_name = 'dc:relation'
+
+    _main_tag_name = 'dc:relation'
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
 
 class Rights(MetaDataProperty):
@@ -418,9 +442,11 @@ class Rights(MetaDataProperty):
                 rights associated with the resource, including intellectual property
                 rights.
     """
-    def __init__(self):
-        super().__init__()
-        self._main_tag_name = 'dc:rights'
+
+    _main_tag_name = 'dc:rights'
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
 
 class Source(MetaDataProperty):
@@ -432,9 +458,11 @@ class Source(MetaDataProperty):
                 resource by means of a string conforming to a formal identification
                 system.
     """
-    def __init__(self):
-        super().__init__()
-        self._main_tag_name = 'dc:source'
+
+    _main_tag_name = 'dc:source'
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
 
 class Subject(MetaDataProperty):
@@ -445,9 +473,11 @@ class Subject(MetaDataProperty):
                 classification codes. Recommended best practice is to use a controlled
                 vocabulary.
     """
-    def __init__(self):
-        super().__init__()
-        self._main_tag_name = 'dc:subject'
+
+    _main_tag_name = 'dc:subject'
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
 
 class Title(MetaDataProperty):
@@ -456,10 +486,12 @@ class Title(MetaDataProperty):
 
     Comment:	Typically, a Title will be a name by which the resource is formally known.
     """
-    def __init__(self):
-        super().__init__()
+
+    _main_tag_name = 'dc:title'
+
+    def __init__(self, **kwargs):
         self.type = None
-        self._main_tag_name = "dc:title"
+        super().__init__(**kwargs)
 
     def append_to_document(self, parent=None):
         parent, soup = MetaDataProperty.get_parent_and_soup(parent)
@@ -489,6 +521,8 @@ class Type(MetaDataProperty):
     References:	[DCMITYPE] http://dublincore.org/documents/dcmi-type-vocabulary/
                 http://www.idpf.org/epub/vocab/package/types/
     """
-    def __init__(self):
-        super().__init__()
-        self._main_tag_name = 'dc:type'
+
+    _main_tag_name = 'dc:type'
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
