@@ -38,6 +38,13 @@ class UtilTest(unittest.TestCase):
         for child in soup.descendants:
             self.assertEqual(soup, util.get_soup(child))
 
+    def test_set_get(self):
+        set_get = util.SetGet()
+        set_get.set(prop_0=0, prop_1=1, prop_2=2)
+        values = set_get.get('prop_0', 'prop_1', 'prop_2')
+        for i, val in enumerate(values):
+            self.assertEqual(i, val)
+
 
 class MetaDataPropertyTest(unittest.TestCase):
     def setUp(self):
@@ -601,7 +608,27 @@ class MetaDataTest(unittest.TestCase):
         self.assertEqual(xml, str(self.parent))
 
     def test_multiple_contributors(self):
-        pass
+        contributor = meta.Contributor()
+        contributor.value = 'Bob'
+        contributor.role = 'Illustrator'
+        contributor.id = 'contributor-id'
+        self.meta.contributors.append(contributor)
+        self.meta.append_to_document(self.parent)
+        xml = '<package>' \
+              '<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">' \
+              '<dc:contributor id="contributor-id">' \
+              'Bob' \
+              '</dc:contributor>' \
+              '<meta property="role" refines="contributor-id">' \
+              'Illustrator' \
+              '</meta>' \
+              '<dc:identifier id="identifier-id">identifier</dc:identifier>' \
+              '<dc:language id="language-id">en-US</dc:language>' \
+              '<dc:title id="title-id">Test Title</dc:title>' \
+              '<meta property="dcterms:modified">1987-06-05T00:00:00</meta>' \
+              '</metadata>' \
+              '</package>'
+        self.assertEqual(xml, str(self.parent))
 
 if __name__ == '__main__':
     unittest.main()
