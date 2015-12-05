@@ -378,12 +378,11 @@ class Language(MetaDataProperty):
                 RFC 4646 [RFC4646].
 
     References:	[RFC4646] http://www.ietf.org/rfc/rfc4646.txt
+                https://tools.ietf.org/html/rfc5646
     """
     def __init__(self):
         super().__init__()
-
-    def to_tag(self):
-        pass
+        self._main_tag_name = 'dc:language'
 
 
 class Publisher(MetaDataProperty):

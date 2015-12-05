@@ -410,6 +410,22 @@ class MetaIdentifierTest(unittest.TestCase):
         self.assertEqual(xml, str(self.parent))
 
 
+class MetaLanguageTest(unittest.TestCase):
+    def setUp(self):
+        self.meta = meta.Language()
+        self.meta.id = None
+        self.meta.value = 'en-US'
+        self.soup = bs4.BeautifulSoup("<package><metadata/></package>", "xml")
+        self.parent = self.soup.package.metadata
+
+    def test_basic(self):
+        self.meta.append_to_document(self.parent)
+        xml = '<metadata>' \
+              '<dc:language>en-US</dc:language>' \
+              '</metadata>'
+        self.assertEqual(xml, str(self.parent))
+
+
 class MetaTitleTest(unittest.TestCase):
     def setUp(self):
         self.title = meta.Title()
