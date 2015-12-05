@@ -92,7 +92,7 @@ class MetaDataProperty:
         self.alternative_script = None
         self.display_seq = None
         self.meta_authority = None
-        self.main_tag_name = "default"
+        self._main_tag_name = "default"
 
     @staticmethod
     def get_parent_and_soup(parent):
@@ -113,7 +113,7 @@ class MetaDataProperty:
         return parent, soup
 
     def append_main_tag(self, parent, soup):
-        main_tag = soup.new_tag(self.main_tag_name)
+        main_tag = soup.new_tag(self._main_tag_name)
         main_tag.append(bs4.NavigableString(self.value))
         parent.append(main_tag)
         if self.id is not None:
@@ -166,7 +166,7 @@ class Person(MetaDataProperty):
         super().__init__()
         self.role = None
         self.role_scheme = None
-        self.main_tag_name = 'person'
+        self._main_tag_name = 'person'
 
     def append_to_document(self, parent=None):
         parent, soup = super().append_to_document(parent)
@@ -189,7 +189,7 @@ class Collection(MetaDataProperty):
     """
     def __init__(self):
         super().__init__()
-        self.main_tag_name = 'meta'
+        self._main_tag_name = 'meta'
         self.type = None
         self.group_position = None
         self.identifier = None
@@ -252,7 +252,7 @@ class Contributor(Person):
 
     def __init__(self):
         super().__init__()
-        self.main_tag_name = 'dc:contributor'
+        self._main_tag_name = 'dc:contributor'
 
     def append_to_document(self, parent=None):
         super().append_to_document(parent)
@@ -276,9 +276,7 @@ class Coverage(MetaDataProperty):
     """
     def __init__(self):
         super().__init__()
-
-    def to_tag(self):
-        pass
+        self._main_tag_name = 'dc:coverage'
 
 
 class Creator(Person):
@@ -290,9 +288,7 @@ class Creator(Person):
     """
     def __init__(self):
         super().__init__()
-
-    def to_tag(self):
-        pass
+        self._main_tag_name = 'dc:creator'
 
 
 class Date(MetaDataProperty):
@@ -461,7 +457,7 @@ class Title(MetaDataProperty):
     def __init__(self):
         super().__init__()
         self.type = None
-        self.main_tag_name = "dc:title"
+        self._main_tag_name = "dc:title"
 
     def append_to_document(self, parent=None):
         parent, soup = MetaDataProperty.get_parent_and_soup(parent)

@@ -105,26 +105,29 @@ class MetaDataPropertyTest(unittest.TestCase):
               '</metadata>'
         self.assertEqual(xml, str(self.parent))
 
+    def test_coverage(self):
+        pass
+
 
 class MetaPersonTest(unittest.TestCase):
     def setUp(self):
-        self.person = meta.Person()
-        self.person.id = 'test-id'
-        self.person.value = 'John Doe'
+        self.meta = meta.Person()
+        self.meta.id = 'test-id'
+        self.meta.value = 'John Doe'
         self.soup = bs4.BeautifulSoup("<package><metadata/></package>", "xml")
         self.parent = self.soup.package.metadata
 
     def test_basic(self):
-        self.person.id = None
-        self.person.append_to_document(self.parent)
+        self.meta.id = None
+        self.meta.append_to_document(self.parent)
         xml = '<metadata>' \
               '<person>John Doe</person>' \
               '</metadata>'
         self.assertEqual(xml, str(self.parent))
 
     def test_role(self):
-        self.person.role = 'Author'
-        self.person.append_to_document(self.parent)
+        self.meta.role = 'Author'
+        self.meta.append_to_document(self.parent)
         xml = '<metadata>' \
               '<person id="test-id">John Doe</person>' \
               '<meta property="role" refines="test-id">' \
@@ -134,14 +137,30 @@ class MetaPersonTest(unittest.TestCase):
         self.assertEqual(xml, str(self.parent))
 
     def test_role_scheme(self):
-        self.person.role = 'aut'
-        self.person.role_scheme = 'marc:relators'
-        self.person.append_to_document(self.parent)
+        self.meta.role = 'aut'
+        self.meta.role_scheme = 'marc:relators'
+        self.meta.append_to_document(self.parent)
         xml = '<metadata>' \
               '<person id="test-id">John Doe</person>' \
               '<meta property="role" refines="test-id" scheme="marc:relators">' \
               'aut' \
               '</meta>' \
+              '</metadata>'
+        self.assertEqual(xml, str(self.parent))
+
+
+class MetaCoverageTest(unittest.TestCase):
+    def setUp(self):
+        self.meta = meta.Coverage()
+        self.meta.id = 'test-id'
+        self.meta.value = 'John Doe'
+        self.soup = bs4.BeautifulSoup("<package><metadata/></package>", "xml")
+        self.parent = self.soup.package.metadata
+
+    def test_basic_id(self):
+        self.meta.append_to_document(self.parent)
+        xml = '<metadata>' \
+              '<dc:coverage id="test-id">John Doe</dc:coverage>' \
               '</metadata>'
         self.assertEqual(xml, str(self.parent))
 
@@ -247,6 +266,46 @@ class MetaContributorTest(unittest.TestCase):
         self.main.append_to_document(self.parent)
         xml = '<metadata>' \
               '<dc:contributor id="test-id">John Doe</dc:contributor>' \
+              '<meta property="role" refines="test-id" scheme="marc:relators">' \
+              'aut' \
+              '</meta>' \
+              '</metadata>'
+        self.assertEqual(xml, str(self.parent))
+
+
+class MetaCreatorTest(unittest.TestCase):
+    def setUp(self):
+        self.meta = meta.Creator()
+        self.meta.id = 'test-id'
+        self.meta.value = 'John Doe'
+        self.soup = bs4.BeautifulSoup("<package><metadata/></package>", "xml")
+        self.parent = self.soup.package.metadata
+
+    def test_basic(self):
+        self.meta.id = None
+        self.meta.append_to_document(self.parent)
+        xml = '<metadata>' \
+              '<dc:creator>John Doe</dc:creator>' \
+              '</metadata>'
+        self.assertEqual(xml, str(self.parent))
+
+    def test_role(self):
+        self.meta.role = 'Author'
+        self.meta.append_to_document(self.parent)
+        xml = '<metadata>' \
+              '<dc:creator id="test-id">John Doe</dc:creator>' \
+              '<meta property="role" refines="test-id">' \
+              'Author' \
+              '</meta>' \
+              '</metadata>'
+        self.assertEqual(xml, str(self.parent))
+
+    def test_role_scheme(self):
+        self.meta.role = 'aut'
+        self.meta.role_scheme = 'marc:relators'
+        self.meta.append_to_document(self.parent)
+        xml = '<metadata>' \
+              '<dc:creator id="test-id">John Doe</dc:creator>' \
               '<meta property="role" refines="test-id" scheme="marc:relators">' \
               'aut' \
               '</meta>' \
