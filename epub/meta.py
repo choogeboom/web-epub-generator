@@ -433,11 +433,7 @@ class Source(MetaDataProperty):
     """
     def __init__(self):
         super().__init__()
-        self.type = None
-        self.source_of = None
-
-    def to_tag(self):
-        pass
+        self._main_tag_name = 'dc:source'
 
 
 class Subject(MetaDataProperty):

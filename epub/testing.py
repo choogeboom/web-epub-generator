@@ -474,6 +474,22 @@ class MetaRightsTest(unittest.TestCase):
         self.assertEqual(xml, str(self.parent))
 
 
+class MetaSourceTest(unittest.TestCase):
+    def setUp(self):
+        self.meta = meta.Source()
+        self.meta.id = None
+        self.meta.value = 'Test'
+        self.soup = bs4.BeautifulSoup("<package><metadata/></package>", "xml")
+        self.parent = self.soup.package.metadata
+
+    def test_basic(self):
+        self.meta.append_to_document(self.parent)
+        xml = '<metadata>' \
+              '<dc:source>Test</dc:source>' \
+              '</metadata>'
+        self.assertEqual(xml, str(self.parent))
+
+
 class MetaTitleTest(unittest.TestCase):
     def setUp(self):
         self.title = meta.Title()
