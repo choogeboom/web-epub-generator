@@ -330,6 +330,86 @@ class MetaDateTest(unittest.TestCase):
         self.assertEqual(xml, str(self.parent))
 
 
+class MetaDescriptionTest(unittest.TestCase):
+    def setUp(self):
+        self.meta = meta.Description()
+        self.meta.id = None
+        self.meta.value = 'This is a description'
+        self.soup = bs4.BeautifulSoup("<package><metadata/></package>", "xml")
+        self.parent = self.soup.package.metadata
+
+    def test_basic(self):
+        self.meta.append_to_document(self.parent)
+        xml = '<metadata>' \
+              '<dc:description>This is a description</dc:description>' \
+              '</metadata>'
+        self.assertEqual(xml, str(self.parent))
+
+
+class MetaFormatTest(unittest.TestCase):
+    def setUp(self):
+        self.meta = meta.Format()
+        self.meta.id = None
+        self.meta.value = 'application/epub+zip'
+        self.soup = bs4.BeautifulSoup("<package><metadata/></package>", "xml")
+        self.parent = self.soup.package.metadata
+
+    def test_basic(self):
+        self.meta.append_to_document(self.parent)
+        xml = '<metadata>' \
+              '<dc:format>application/epub+zip</dc:format>' \
+              '</metadata>'
+        self.assertEqual(xml, str(self.parent))
+
+
+class MetaIdentifierTest(unittest.TestCase):
+    def setUp(self):
+        self.meta = meta.Identifier()
+        self.meta.id = 'test-id'
+        self.meta.value = 'identifier'
+        self.soup = bs4.BeautifulSoup("<package><metadata/></package>", "xml")
+        self.parent = self.soup.package.metadata
+
+    def test_basic(self):
+        self.meta.id = None
+        self.meta.append_to_document(self.parent)
+        xml = '<metadata>' \
+              '<dc:identifier>identifier</dc:identifier>' \
+              '</metadata>'
+        self.assertEqual(xml, str(self.parent))
+
+    def test_basic_id(self):
+        self.meta.append_to_document(self.parent)
+        xml = '<metadata>' \
+              '<dc:identifier id="test-id">identifier</dc:identifier>' \
+              '</metadata>'
+        self.assertEqual(xml, str(self.parent))
+
+    def test_type(self):
+        self.meta.type = 'ISBN'
+        self.meta.append_to_document(self.parent)
+        xml = '<metadata>' \
+              '<dc:identifier id="test-id">identifier</dc:identifier>' \
+              '<meta property="identifier-type" refines="test-id">' \
+              'ISBN' \
+              '</meta>' \
+              '</metadata>'
+        self.assertEqual(xml, str(self.parent))
+
+    def test_type_and_scheme(self):
+        self.meta.type = '06'
+        self.meta.scheme = 'onix:codelist5'
+        self.meta.append_to_document(self.parent)
+        xml = '<metadata>' \
+              '<dc:identifier id="test-id">identifier</dc:identifier>' \
+              '<meta property="identifier-type" refines="test-id" ' \
+              'scheme="onix:codelist5">' \
+              '06' \
+              '</meta>' \
+              '</metadata>'
+        self.assertEqual(xml, str(self.parent))
+
+
 class MetaTitleTest(unittest.TestCase):
     def setUp(self):
         self.title = meta.Title()

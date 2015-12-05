@@ -324,6 +324,7 @@ class Description(MetaDataProperty):
     """
     def __init__(self):
         super().__init__()
+        self._main_tag_name = 'dc:description'
 
 
 class Format(MetaDataProperty):
@@ -338,9 +339,7 @@ class Format(MetaDataProperty):
     """
     def __init__(self):
         super().__init__()
-
-    def to_tag(self):
-        pass
+        self._main_tag_name = 'dc:format'
 
 
 class Identifier(MetaDataProperty):
@@ -352,11 +351,23 @@ class Identifier(MetaDataProperty):
     """
     def __init__(self):
         super().__init__()
+        self._main_tag_name = 'dc:identifier'
         self.type = None
         self.scheme = None
 
-    def to_tag(self):
-        pass
+    def append_to_document(self, parent=None):
+        parent, soup = super().append_to_document(parent)
+        self.append_type(parent, soup)
+        return parent, soup
+
+    def append_type(self, parent, soup):
+        if self.type is None:
+            return
+        tag = soup.new_tag('meta', property='identifier-type', refines=self.id)
+        if self.scheme is not None:
+            tag['scheme'] = self.scheme
+        tag.append(bs4.NavigableString(str(self.type)))
+        parent.append(tag)
 
 
 class Language(MetaDataProperty):
