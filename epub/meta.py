@@ -490,6 +490,4 @@ class Type(MetaDataProperty):
     """
     def __init__(self):
         super().__init__()
-
-    def to_tag(self):
-        pass
+        self._main_tag_name = 'dc:type'
