@@ -3,6 +3,7 @@ For building and editing EPUB books
 """
 import bs4
 from epub import meta
+from epub import util
 
 
 class Container:
@@ -98,27 +99,30 @@ class Manifest:
         self.items = []
 
 
-class Item:
+class Item(util.SetGet):
     """
     The item element represents a Publication Resource, such as a chapter
     """
-    def __init__(self):
+    def __init__(self, **kwargs):
         self.id = ''
         self.href = ''
         self.media_type = ''
-        self.fallback = ''
+        self.fallback = None
         self.properties = []
         self.media_overlay = None
+        self.set(**kwargs)
 
     def append_to_document(self, parent, soup):
-        tag = soup.new_tag("item", id=self.id, href=self.href, media_type=self.media_type)
+        tag = soup.new_tag("item", id=self.id, href=self.href)
+        tag["media-type"] = self.media_type
+        parent.append(tag)
         if self.fallback is not None:
-            tag['fallback'] = self.fallback
+            tag['fallback'] = self.fallback.id
+            self.fallback.append_to_document(parent, soup)
         if len(self.properties) > 0:
             tag['properties'] = ' '.join(self.properties)
         if self.media_overlay is not None:
             tag['media-overlay'] = self.media_overlay
-        parent.append(tag)
 
 
 
