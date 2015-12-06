@@ -533,9 +533,9 @@ class MetaDataTest(unittest.TestCase):
         self.meta.append_to_document(self.parent)
         xml = '<package>' \
               '<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">' \
+              '<dc:title id="title-id">Test Title</dc:title>' \
               '<dc:identifier id="identifier-id">identifier</dc:identifier>' \
               '<dc:language id="language-id">en-US</dc:language>' \
-              '<dc:title id="title-id">Test Title</dc:title>' \
               '<meta property="dcterms:modified">1987-06-05T00:00:00</meta>' \
               '</metadata>' \
               '</package>'
@@ -548,15 +548,15 @@ class MetaDataTest(unittest.TestCase):
         self.meta.append_to_document(self.parent)
         xml = '<package>' \
               '<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">' \
+              '<dc:title id="title-id">Test Title</dc:title>' \
+              '<dc:identifier id="identifier-id">identifier</dc:identifier>' \
               '<dc:contributor id="contributor-id">' \
               'Bob' \
               '</dc:contributor>' \
               '<meta property="role" refines="contributor-id">' \
               'Illustrator' \
               '</meta>' \
-              '<dc:identifier id="identifier-id">identifier</dc:identifier>' \
               '<dc:language id="language-id">en-US</dc:language>' \
-              '<dc:title id="title-id">Test Title</dc:title>' \
               '<meta property="dcterms:modified">1987-06-05T00:00:00</meta>' \
               '</metadata>' \
               '</package>'
@@ -565,34 +565,116 @@ class MetaDataTest(unittest.TestCase):
     def test_multiple_contributors(self):
         values = ['Bob', 'Jake', 'Sue']
         roles = ['Illustrator', 'Chef', 'Scientist']
-        ids = ['contributor_{}'.format(i) for i in list(range(len(roles)))]
+        ids = ['contributor_{}'.format(i) for i in range(3)]
         contributors = [meta.Contributor(value=value, role=role, id=id)
-                        for value, role, num in zip(values, roles, ids)]
+                        for value, role, id in zip(values, roles, ids)]
         self.meta.contributors = contributors
         self.meta.append_to_document(self.parent)
         xml = '<package>' \
               '<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">' \
+              '<dc:title id="title-id">Test Title</dc:title>' \
+              '<dc:identifier id="identifier-id">identifier</dc:identifier>' \
               '<dc:contributor id="contributor_0">' \
               'Bob' \
               '</dc:contributor>' \
+              '<meta property="display-seq" refines="contributor_0">' \
+              '0' \
+              '</meta>' \
               '<meta property="role" refines="contributor_0">' \
               'Illustrator' \
               '</meta>' \
               '<dc:contributor id="contributor_1">' \
               'Jake' \
               '</dc:contributor>' \
+              '<meta property="display-seq" refines="contributor_1">' \
+              '1' \
+              '</meta>' \
               '<meta property="role" refines="contributor_1">' \
               'Chef' \
               '</meta>' \
               '<dc:contributor id="contributor_2">' \
               'Sue' \
               '</dc:contributor>' \
+              '<meta property="display-seq" refines="contributor_2">' \
+              '2' \
+              '</meta>' \
               '<meta property="role" refines="contributor_2">' \
               'Scientist' \
               '</meta>' \
-              '<dc:identifier id="identifier-id">identifier</dc:identifier>' \
               '<dc:language id="language-id">en-US</dc:language>' \
+              '<meta property="dcterms:modified">1987-06-05T00:00:00</meta>' \
+              '</metadata>' \
+              '</package>'
+        self.assertEqual(xml, str(self.parent))
+
+    def test_coverages(self):
+        coverage = meta.Coverage(value='USA', id=None)
+        self.meta.contributors.append(coverage)
+        self.meta.append_to_document(self.parent)
+        xml = '<package>' \
+              '<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">' \
               '<dc:title id="title-id">Test Title</dc:title>' \
+              '<dc:identifier id="identifier-id">identifier</dc:identifier>' \
+              '<dc:coverage>' \
+              'USA' \
+              '</dc:coverage>' \
+              '<dc:language id="language-id">en-US</dc:language>' \
+              '<meta property="dcterms:modified">1987-06-05T00:00:00</meta>' \
+              '</metadata>' \
+              '</package>'
+        self.assertEqual(xml, str(self.parent))
+
+    def test_multiple_coverages(self):
+        values = ['USA', 'France', 'Germany']
+        ids = ['coverage_{}'.format(i) for i in range(3)]
+        coverages = [meta.Coverage(value=value, id=_id) for value, _id in zip(values, ids)]
+        self.meta.coverages = coverages
+        self.meta.append_to_document(self.parent)
+        xml = '<package>' \
+              '<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">' \
+              '<dc:title id="title-id">Test Title</dc:title>' \
+              '<dc:identifier id="identifier-id">identifier</dc:identifier>' \
+              '<dc:coverage id="coverage_0">' \
+              'USA' \
+              '</dc:coverage>' \
+              '<meta property="display-seq" refines="coverage_0">' \
+              '0' \
+              '</meta>' \
+              '<dc:coverage id="coverage_1">' \
+              'France' \
+              '</dc:coverage>' \
+              '<meta property="display-seq" refines="coverage_1">' \
+              '1' \
+              '</meta>' \
+              '<dc:coverage id="coverage_2">' \
+              'Germany' \
+              '</dc:coverage>' \
+              '<meta property="display-seq" refines="coverage_2">' \
+              '2' \
+              '</meta>' \
+              '<dc:language id="language-id">en-US</dc:language>' \
+              '<meta property="dcterms:modified">1987-06-05T00:00:00</meta>' \
+              '</metadata>' \
+              '</package>'
+        self.assertEqual(xml, str(self.parent))
+
+    def test_major(self):
+        self.meta.creators = [meta.Creator(value='Bram Stoker', id=None)]
+        self.meta.titles = [meta.Title(value='Dracula '
+                                             '(Barnes & Noble Classics Series)', id=None)]
+        self.meta.rights = [meta.Rights(value='NONE', id=None)]
+        self.meta.identifiers = [meta.Identifier(value='9781411431645', id='book-id')]
+        self.meta.languages = [meta.Language(value='en', id=None)]
+        self.meta.publishers = [meta.Publisher(value='Barnes&Noble', id=None)]
+        self.meta.append_to_document(self.parent)
+        xml = '<package>' \
+              '<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">' \
+              '<dc:title>Dracula (Barnes &amp; Noble Classics Series)</dc:title>' \
+              '<dc:creator>Bram Stoker</dc:creator>' \
+              '<dc:identifier id="book-id">9781411431645</dc:identifier>' \
+              '<dc:language>en</dc:language>' \
+              '<dc:publisher>Barnes&amp;Noble</dc:publisher>' \
+              '<dc:rights>NONE</dc:rights>' \
               '<meta property="dcterms:modified">1987-06-05T00:00:00</meta>' \
               '</metadata>' \
               '</package>'

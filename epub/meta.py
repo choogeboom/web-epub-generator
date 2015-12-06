@@ -40,47 +40,30 @@ class MetaData(util.SetGet):
         else:
             soup = util.get_soup(parent)
 
-        tag = soup.new_tag("metadata")
-        tag["xmlns:dc"] = "http://purl.org/dc/elements/1.1/"
-        parent.append(tag)
-        for contributor in self.contributors:
-            contributor.append_to_document(parent=tag)
-        for coverage in self.coverages:
-            coverage.append_to_document(parent=tag)
-        for creator in self.creators:
-            creator.append_to_document(parent=tag)
-        for date in self.dates:
-            date.append_to_document(parent=tag)
-        for description in self.descriptions:
-            description.append_to_document(parent=tag)
-        for fmt in self.formats:
-            fmt.append_to_document(parent=tag)
-        for identifier in self.identifiers:
-            identifier.append_to_document(parent=tag)
-        for language in self.languages:
-            language.append_to_document(parent=tag)
-        for publisher in self.publishers:
-            publisher.append_to_document(parent=tag)
-        for relation in self.relations:
-            relation.append_to_document(parent=tag)
-        for right in self.rights:
-            right.append_to_document(parent=tag)
-        for source in self.sources:
-            source.append_to_document(parent=tag)
-        for subject in self.subjects:
-            subject.append_to_document(parent=tag)
-        for tp in self.types:
-            tp.append_to_document(parent=tag)
-        for title in self.titles:
-            title.append_to_document(parent=tag)
-        for collection in self.collections:
-            collection.append_to_document(parent=tag)
+        metadata = soup.new_tag("metadata")
+        metadata["xmlns:dc"] = "http://purl.org/dc/elements/1.1/"
+        parent.append(metadata)
+        prop_names = ['titles', 'creators', 'identifiers', 'contributors', 'coverages',
+                      'dates',  'descriptions', 'formats', 'languages', 'publishers',
+                      'relations', 'rights', 'sources', 'subjects', 'types']
+        for prop_name in prop_names:
+            self.append_property(prop_name, metadata)
         modified_tag = soup.new_tag("meta")
         modified_tag["property"] = "dcterms:modified"
         modified_tag.append(bs4.NavigableString(self.modified.isoformat()))
-        tag.append(modified_tag)
+        metadata.append(modified_tag)
 
-        return tag, soup
+        return metadata, soup
+
+    def append_property(self, prop_name, parent):
+        prop_values = self.__dict__[prop_name]
+        if len(prop_values) == 1:
+            prop_values[0].display_seq = None
+            prop_values[0].append_to_document(parent=parent)
+            return
+        for i, value in enumerate(prop_values):
+            value.display_seq = i
+            value.append_to_document(parent=parent)
 
 
 class MetaDataProperty(util.SetGet):
