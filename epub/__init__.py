@@ -63,6 +63,14 @@ class PackageDocument:
         self.collection = []
 
 
+class Manifest:
+    pass
+
+
+class Spine:
+    pass
+
+
 class EPub:
 
     def __init__(self):
