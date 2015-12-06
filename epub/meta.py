@@ -27,19 +27,14 @@ class MetaData(util.SetGet):
         self.modified = datetime.datetime.today()
         self.set(**kwargs)
 
-    def append_to_document(self, parent=None):
+    def append_to_document(self, parent, soup):
         """
         Add the meta data object to the document as a child of the specified parent
 
         :param parent: the parent tag of the meta data object
+        :param soup: the BeautifulSoup document object
         :return: The document object
         """
-        if parent is None:
-            soup = bs4.BeautifulSoup("<package/>", "xml")
-            parent = soup.package
-        else:
-            soup = util.get_soup(parent)
-
         metadata = soup.new_tag("metadata")
         metadata["xmlns:dc"] = "http://purl.org/dc/elements/1.1/"
         parent.append(metadata)
@@ -47,23 +42,21 @@ class MetaData(util.SetGet):
                       'dates',  'descriptions', 'formats', 'languages', 'publishers',
                       'relations', 'rights', 'sources', 'subjects', 'types']
         for prop_name in prop_names:
-            self.append_property(prop_name, metadata)
+            self.append_property(prop_name, metadata, soup)
         modified_tag = soup.new_tag("meta")
         modified_tag["property"] = "dcterms:modified"
         modified_tag.append(bs4.NavigableString(self.modified.isoformat()))
         metadata.append(modified_tag)
 
-        return metadata, soup
-
-    def append_property(self, prop_name, parent):
+    def append_property(self, prop_name, parent, soup):
         prop_values = self.__dict__[prop_name]
         if len(prop_values) == 1:
             prop_values[0].display_seq = None
-            prop_values[0].append_to_document(parent=parent)
+            prop_values[0].append_to_document(parent, soup)
             return
         for i, value in enumerate(prop_values):
             value.display_seq = i
-            value.append_to_document(parent=parent)
+            value.append_to_document(parent, soup)
 
 
 class MetaDataProperty(util.SetGet):
@@ -91,14 +84,12 @@ class MetaDataProperty(util.SetGet):
             soup = util.get_soup(parent)
         return parent, soup
 
-    def append_to_document(self, parent=None):
-        parent, soup = MetaDataProperty.get_parent_and_soup(parent)
+    def append_to_document(self, parent, soup):
         self.append_main_tag(parent, soup)
         self.append_alternative_script(parent, soup)
         self.append_display_seq(parent, soup)
         self.append_file_as(parent, soup)
         self.append_meta_authority(parent, soup)
-        return parent, soup
 
     def append_main_tag(self, parent, soup):
         main_tag = soup.new_tag(self._main_tag_name)
@@ -162,10 +153,9 @@ class Person(MetaDataProperty):
         self.role_scheme = None
         super().__init__(**kwargs)
 
-    def append_to_document(self, parent=None):
-        parent, soup = super().append_to_document(parent)
+    def append_to_document(self, parent, soup):
+        super().append_to_document(parent, soup)
         self.append_role(parent, soup)
-        return parent, soup
 
     def append_role(self, parent, soup):
         if self.role is None:
@@ -192,12 +182,12 @@ class Collection(MetaDataProperty):
         self.refines_id = None
         super().__init__(**kwargs)
 
-    def append_to_document(self, parent=None):
-        parent, soup = super().append_to_document(parent)
+    def append_to_document(self, parent, soup):
+        super().append_to_document(parent, soup)
         self.append_type(parent, soup)
         self.append_group_position(parent, soup)
         self.append_identifier(parent, soup)
-        self.append_collection(parent)
+        self.append_collection(parent, soup)
 
     def append_main_tag(self, parent, soup):
         main_tag = soup.new_tag("meta", property="belongs-to-collection")
@@ -230,11 +220,11 @@ class Collection(MetaDataProperty):
         tag.append(bs4.NavigableString(self.identifier))
         parent.append(tag)
 
-    def append_collection(self, parent):
+    def append_collection(self, parent, soup):
         if self.collection is None:
             return
         self.collection.refines_id = self.id
-        self.collection.append_to_document(parent)
+        self.collection.append_to_document(parent, soup)
 
 
 class Contributor(Person):
@@ -357,10 +347,9 @@ class Identifier(MetaDataProperty):
         self.scheme = None
         super().__init__(**kwargs)
 
-    def append_to_document(self, parent=None):
-        parent, soup = super().append_to_document(parent)
+    def append_to_document(self, parent, soup):
+        super().append_to_document(parent, soup)
         self.append_type(parent, soup)
-        return parent, soup
 
     def append_type(self, parent, soup):
         if self.type is None:
@@ -476,8 +465,7 @@ class Title(MetaDataProperty):
         self.type = None
         super().__init__(**kwargs)
 
-    def append_to_document(self, parent=None):
-        parent, soup = MetaDataProperty.get_parent_and_soup(parent)
+    def append_to_document(self, parent, soup):
         tag = soup.new_tag("title", nsprefix="dc")
         if self.id is not None:
             tag["id"] = self.id
@@ -490,7 +478,6 @@ class Title(MetaDataProperty):
                                property="title-type")
             parent.append(tag)
             tag.append(bs4.NavigableString(self.type))
-        return tag, soup
 
 
 class Type(MetaDataProperty):

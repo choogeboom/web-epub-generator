@@ -56,14 +56,14 @@ class MetaDataPropertyTest(unittest.TestCase):
 
     def test_basic(self):
         self.meta.id = None
-        self.meta.append_to_document(self.parent)
+        self.meta.append_to_document(self.parent, self.soup)
         xml = '<metadata>' \
               '<default>Test Value</default>' \
               '</metadata>'
         self.assertEqual(xml, str(self.parent))
 
     def test_id_only(self):
-        self.meta.append_to_document(self.parent)
+        self.meta.append_to_document(self.parent, self.soup)
         xml = '<metadata>' \
               '<default id="test-id">Test Value</default>' \
               '</metadata>'
@@ -71,7 +71,7 @@ class MetaDataPropertyTest(unittest.TestCase):
 
     def test_file_as(self):
         self.meta.file_as = 'Value, Test'
-        self.meta.append_to_document(self.parent)
+        self.meta.append_to_document(self.parent, self.soup)
         xml = '<metadata>' \
               '<default id="test-id">Test Value</default>' \
               '<meta property="file-as" refines="test-id">' \
@@ -82,7 +82,7 @@ class MetaDataPropertyTest(unittest.TestCase):
 
     def test_alternative_script(self):
         self.meta.alternative_script = 'Test Alt'
-        self.meta.append_to_document(self.parent)
+        self.meta.append_to_document(self.parent, self.soup)
         xml = '<metadata>' \
               '<default id="test-id">Test Value</default>' \
               '<meta property="alternative-script" refines="test-id">' \
@@ -93,7 +93,7 @@ class MetaDataPropertyTest(unittest.TestCase):
 
     def test_display_seq(self):
         self.meta.display_seq = 6
-        self.meta.append_to_document(self.parent)
+        self.meta.append_to_document(self.parent, self.soup)
         xml = '<metadata>' \
               '<default id="test-id">Test Value</default>' \
               '<meta property="display-seq" refines="test-id">' \
@@ -104,7 +104,7 @@ class MetaDataPropertyTest(unittest.TestCase):
 
     def test_meta_authority(self):
         self.meta.meta_authority = 'Test'
-        self.meta.append_to_document(self.parent)
+        self.meta.append_to_document(self.parent, self.soup)
         xml = '<metadata>' \
               '<default id="test-id">Test Value</default>' \
               '<meta property="meta-auth" refines="test-id">' \
@@ -122,7 +122,7 @@ class MetaPersonTest(unittest.TestCase):
 
     def test_basic(self):
         self.meta.id = None
-        self.meta.append_to_document(self.parent)
+        self.meta.append_to_document(self.parent, self.soup)
         xml = '<metadata>' \
               '<person>John Doe</person>' \
               '</metadata>'
@@ -130,7 +130,7 @@ class MetaPersonTest(unittest.TestCase):
 
     def test_role(self):
         self.meta.role = 'Author'
-        self.meta.append_to_document(self.parent)
+        self.meta.append_to_document(self.parent, self.soup)
         xml = '<metadata>' \
               '<person id="test-id">John Doe</person>' \
               '<meta property="role" refines="test-id">' \
@@ -142,7 +142,7 @@ class MetaPersonTest(unittest.TestCase):
     def test_role_scheme(self):
         self.meta.role = 'aut'
         self.meta.role_scheme = 'marc:relators'
-        self.meta.append_to_document(self.parent)
+        self.meta.append_to_document(self.parent, self.soup)
         xml = '<metadata>' \
               '<person id="test-id">John Doe</person>' \
               '<meta property="role" refines="test-id" scheme="marc:relators">' \
@@ -161,7 +161,7 @@ class MetaCoverageTest(unittest.TestCase):
         self.parent = self.soup.package.metadata
 
     def test_basic_id(self):
-        self.meta.append_to_document(self.parent)
+        self.meta.append_to_document(self.parent, self.soup)
         xml = '<metadata>' \
               '<dc:coverage id="test-id">John Doe</dc:coverage>' \
               '</metadata>'
@@ -176,7 +176,7 @@ class MetaCollectionTest(unittest.TestCase):
 
     def test_basic(self):
         self.coll.id = None
-        self.coll.append_to_document(self.parent)
+        self.coll.append_to_document(self.parent, self.soup)
         xml = '<metadata>' \
               '<meta property="belongs-to-collection">Test Value</meta>' \
               '</metadata>'
@@ -184,7 +184,7 @@ class MetaCollectionTest(unittest.TestCase):
 
     def test_type(self):
         self.coll.type = 'series'
-        self.coll.append_to_document(self.parent)
+        self.coll.append_to_document(self.parent, self.soup)
         xml = '<metadata>' \
               '<meta id="test-id" property="belongs-to-collection">Test Value</meta>' \
               '<meta property="collection-type" refines="test-id">series</meta>' \
@@ -193,7 +193,7 @@ class MetaCollectionTest(unittest.TestCase):
 
     def test_group_position(self):
         self.coll.group_position = 10
-        self.coll.append_to_document(self.parent)
+        self.coll.append_to_document(self.parent, self.soup)
         xml = '<metadata>' \
               '<meta id="test-id" property="belongs-to-collection">Test Value</meta>' \
               '<meta property="group-position" refines="test-id">10</meta>' \
@@ -202,7 +202,7 @@ class MetaCollectionTest(unittest.TestCase):
 
     def test_identifier(self):
         self.coll.identifier = 'identifier'
-        self.coll.append_to_document(self.parent)
+        self.coll.append_to_document(self.parent, self.soup)
         xml = '<metadata>' \
               '<meta id="test-id" property="belongs-to-collection">Test Value</meta>' \
               '<meta property="dcterms:identifier" refines="test-id">identifier</meta>' \
@@ -211,7 +211,7 @@ class MetaCollectionTest(unittest.TestCase):
 
     def test_refines_id(self):
         self.coll.refines_id = 'other-id'
-        self.coll.append_to_document(self.parent)
+        self.coll.append_to_document(self.parent, self.soup)
         xml = '<metadata>' \
               '<meta id="test-id" property="belongs-to-collection" ' \
               'refines="other-id">Test ' \
@@ -222,7 +222,7 @@ class MetaCollectionTest(unittest.TestCase):
     def test_collection(self):
         self.coll.collection = meta.Collection(id='other-id', identifier='identifier',
                                                value='Other Value')
-        self.coll.append_to_document(self.parent)
+        self.coll.append_to_document(self.parent, self.soup)
         xml = '<metadata>' \
               '<meta id="test-id" property="belongs-to-collection">Test Value</meta>' \
               '<meta id="other-id" property="belongs-to-collection" ' \
@@ -240,7 +240,7 @@ class MetaContributorTest(unittest.TestCase):
 
     def test_basic(self):
         self.main.id = None
-        self.main.append_to_document(self.parent)
+        self.main.append_to_document(self.parent, self.soup)
         xml = '<metadata>' \
               '<dc:contributor>John Doe</dc:contributor>' \
               '</metadata>'
@@ -248,7 +248,7 @@ class MetaContributorTest(unittest.TestCase):
 
     def test_role(self):
         self.main.role = 'Author'
-        self.main.append_to_document(self.parent)
+        self.main.append_to_document(self.parent, self.soup)
         xml = '<metadata>' \
               '<dc:contributor id="test-id">John Doe</dc:contributor>' \
               '<meta property="role" refines="test-id">' \
@@ -259,7 +259,7 @@ class MetaContributorTest(unittest.TestCase):
 
     def test_role_scheme(self):
         self.main.set(role='aut', role_scheme='marc:relators')
-        self.main.append_to_document(self.parent)
+        self.main.append_to_document(self.parent, self.soup)
         xml = '<metadata>' \
               '<dc:contributor id="test-id">John Doe</dc:contributor>' \
               '<meta property="role" refines="test-id" scheme="marc:relators">' \
@@ -277,7 +277,7 @@ class MetaCreatorTest(unittest.TestCase):
 
     def test_basic(self):
         self.meta.id = None
-        self.meta.append_to_document(self.parent)
+        self.meta.append_to_document(self.parent, self.soup)
         xml = '<metadata>' \
               '<dc:creator>John Doe</dc:creator>' \
               '</metadata>'
@@ -285,7 +285,7 @@ class MetaCreatorTest(unittest.TestCase):
 
     def test_role(self):
         self.meta.role = 'Author'
-        self.meta.append_to_document(self.parent)
+        self.meta.append_to_document(self.parent, self.soup)
         xml = '<metadata>' \
               '<dc:creator id="test-id">John Doe</dc:creator>' \
               '<meta property="role" refines="test-id">' \
@@ -296,7 +296,7 @@ class MetaCreatorTest(unittest.TestCase):
 
     def test_role_scheme(self):
         self.meta.set(role='aut', role_scheme='marc:relators')
-        self.meta.append_to_document(self.parent)
+        self.meta.append_to_document(self.parent, self.soup)
         xml = '<metadata>' \
               '<dc:creator id="test-id">John Doe</dc:creator>' \
               '<meta property="role" refines="test-id" scheme="marc:relators">' \
@@ -313,7 +313,7 @@ class MetaDateTest(unittest.TestCase):
         self.parent = self.soup.package.metadata
 
     def test_basic(self):
-        self.meta.append_to_document(self.parent)
+        self.meta.append_to_document(self.parent, self.soup)
         xml = '<metadata>' \
               '<dc:date>1983-11-16T00:00:00</dc:date>' \
               '</metadata>'
@@ -327,7 +327,7 @@ class MetaDescriptionTest(unittest.TestCase):
         self.parent = self.soup.package.metadata
 
     def test_basic(self):
-        self.meta.append_to_document(self.parent)
+        self.meta.append_to_document(self.parent, self.soup)
         xml = '<metadata>' \
               '<dc:description>This is a description</dc:description>' \
               '</metadata>'
@@ -341,7 +341,7 @@ class MetaFormatTest(unittest.TestCase):
         self.parent = self.soup.package.metadata
 
     def test_basic(self):
-        self.meta.append_to_document(self.parent)
+        self.meta.append_to_document(self.parent, self.soup)
         xml = '<metadata>' \
               '<dc:format>application/epub+zip</dc:format>' \
               '</metadata>'
@@ -356,14 +356,14 @@ class MetaIdentifierTest(unittest.TestCase):
 
     def test_basic(self):
         self.meta.id = None
-        self.meta.append_to_document(self.parent)
+        self.meta.append_to_document(self.parent, self.soup)
         xml = '<metadata>' \
               '<dc:identifier>identifier</dc:identifier>' \
               '</metadata>'
         self.assertEqual(xml, str(self.parent))
 
     def test_basic_id(self):
-        self.meta.append_to_document(self.parent)
+        self.meta.append_to_document(self.parent, self.soup)
         xml = '<metadata>' \
               '<dc:identifier id="test-id">identifier</dc:identifier>' \
               '</metadata>'
@@ -371,7 +371,7 @@ class MetaIdentifierTest(unittest.TestCase):
 
     def test_type(self):
         self.meta.type = 'ISBN'
-        self.meta.append_to_document(self.parent)
+        self.meta.append_to_document(self.parent, self.soup)
         xml = '<metadata>' \
               '<dc:identifier id="test-id">identifier</dc:identifier>' \
               '<meta property="identifier-type" refines="test-id">' \
@@ -382,7 +382,7 @@ class MetaIdentifierTest(unittest.TestCase):
 
     def test_type_and_scheme(self):
         self.meta.set(type='06', scheme='onix:codelist5')
-        self.meta.append_to_document(self.parent)
+        self.meta.append_to_document(self.parent, self.soup)
         xml = '<metadata>' \
               '<dc:identifier id="test-id">identifier</dc:identifier>' \
               '<meta property="identifier-type" refines="test-id" ' \
@@ -400,7 +400,7 @@ class MetaLanguageTest(unittest.TestCase):
         self.parent = self.soup.package.metadata
 
     def test_basic(self):
-        self.meta.append_to_document(self.parent)
+        self.meta.append_to_document(self.parent, self.soup)
         xml = '<metadata>' \
               '<dc:language>en-US</dc:language>' \
               '</metadata>'
@@ -414,7 +414,7 @@ class MetaPublisherTest(unittest.TestCase):
         self.parent = self.soup.package.metadata
 
     def test_basic(self):
-        self.meta.append_to_document(self.parent)
+        self.meta.append_to_document(self.parent, self.soup)
         xml = '<metadata>' \
               '<dc:publisher>Test</dc:publisher>' \
               '</metadata>'
@@ -428,7 +428,7 @@ class MetaRelationTest(unittest.TestCase):
         self.parent = self.soup.package.metadata
 
     def test_basic(self):
-        self.meta.append_to_document(self.parent)
+        self.meta.append_to_document(self.parent, self.soup)
         xml = '<metadata>' \
               '<dc:relation>Test</dc:relation>' \
               '</metadata>'
@@ -442,7 +442,7 @@ class MetaRightsTest(unittest.TestCase):
         self.parent = self.soup.package.metadata
 
     def test_basic(self):
-        self.meta.append_to_document(self.parent)
+        self.meta.append_to_document(self.parent, self.soup)
         xml = '<metadata>' \
               '<dc:rights>Test</dc:rights>' \
               '</metadata>'
@@ -456,7 +456,7 @@ class MetaSourceTest(unittest.TestCase):
         self.parent = self.soup.package.metadata
 
     def test_basic(self):
-        self.meta.append_to_document(self.parent)
+        self.meta.append_to_document(self.parent, self.soup)
         xml = '<metadata>' \
               '<dc:source>Test</dc:source>' \
               '</metadata>'
@@ -470,7 +470,7 @@ class MetaSubjectTest(unittest.TestCase):
         self.parent = self.soup.package.metadata
 
     def test_basic(self):
-        self.meta.append_to_document(self.parent)
+        self.meta.append_to_document(self.parent, self.soup)
         xml = '<metadata>' \
               '<dc:subject>Test</dc:subject>' \
               '</metadata>'
@@ -485,18 +485,18 @@ class MetaTitleTest(unittest.TestCase):
 
     def test_basic_title(self):
         self.title.id = None
-        self.title.append_to_document(self.parent)
+        self.title.append_to_document(self.parent, self.soup)
         xml = "<metadata><dc:title>Test Title</dc:title></metadata>"
         self.assertEqual(xml, str(self.parent))
 
     def test_title_with_id(self):
-        tag, soup = self.title.append_to_document(self.parent)
-        xml = '<dc:title id="test-id">Test Title</dc:title>'
-        self.assertEqual(xml, str(tag))
+        self.title.append_to_document(self.parent, self.soup)
+        xml = '<metadata><dc:title id="test-id">Test Title</dc:title></metadata>'
+        self.assertEqual(xml, str(self.parent))
 
     def test_title_with_id_and_type(self):
         self.title.type = "main"
-        self.title.append_to_document(self.parent)
+        self.title.append_to_document(self.parent, self.soup)
         xml = '<metadata>' \
               '<dc:title id="test-id">Test Title</dc:title>' \
               '<meta property="title-type" refines="test-id">main</meta>' \
@@ -511,7 +511,7 @@ class MetaTypeTest(unittest.TestCase):
         self.parent = self.soup.package.metadata
 
     def test_basic(self):
-        self.meta.append_to_document(self.parent)
+        self.meta.append_to_document(self.parent, self.soup)
         xml = '<metadata>' \
               '<dc:type>Test</dc:type>' \
               '</metadata>'
@@ -530,7 +530,7 @@ class MetaDataTest(unittest.TestCase):
         self.parent = self.soup.package
 
     def test_basic(self):
-        self.meta.append_to_document(self.parent)
+        self.meta.append_to_document(self.parent, self.soup)
         xml = '<package>' \
               '<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">' \
               '<dc:title id="title-id">Test Title</dc:title>' \
@@ -545,7 +545,7 @@ class MetaDataTest(unittest.TestCase):
         contributor = meta.Contributor(id='contributor-id', role='Illustrator',
                                        value='Bob')
         self.meta.contributors.append(contributor)
-        self.meta.append_to_document(self.parent)
+        self.meta.append_to_document(self.parent, self.soup)
         xml = '<package>' \
               '<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">' \
               '<dc:title id="title-id">Test Title</dc:title>' \
@@ -569,7 +569,7 @@ class MetaDataTest(unittest.TestCase):
         contributors = [meta.Contributor(value=value, role=role, id=id)
                         for value, role, id in zip(values, roles, ids)]
         self.meta.contributors = contributors
-        self.meta.append_to_document(self.parent)
+        self.meta.append_to_document(self.parent, self.soup)
         xml = '<package>' \
               '<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">' \
               '<dc:title id="title-id">Test Title</dc:title>' \
@@ -610,7 +610,7 @@ class MetaDataTest(unittest.TestCase):
     def test_coverages(self):
         coverage = meta.Coverage(value='USA', id=None)
         self.meta.contributors.append(coverage)
-        self.meta.append_to_document(self.parent)
+        self.meta.append_to_document(self.parent, self.soup)
         xml = '<package>' \
               '<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">' \
               '<dc:title id="title-id">Test Title</dc:title>' \
@@ -629,7 +629,7 @@ class MetaDataTest(unittest.TestCase):
         ids = ['coverage_{}'.format(i) for i in range(3)]
         coverages = [meta.Coverage(value=value, id=_id) for value, _id in zip(values, ids)]
         self.meta.coverages = coverages
-        self.meta.append_to_document(self.parent)
+        self.meta.append_to_document(self.parent, self.soup)
         xml = '<package>' \
               '<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">' \
               '<dc:title id="title-id">Test Title</dc:title>' \
@@ -666,7 +666,7 @@ class MetaDataTest(unittest.TestCase):
         self.meta.identifiers = [meta.Identifier(value='9781411431645', id='book-id')]
         self.meta.languages = [meta.Language(value='en', id=None)]
         self.meta.publishers = [meta.Publisher(value='Barnes&Noble', id=None)]
-        self.meta.append_to_document(self.parent)
+        self.meta.append_to_document(self.parent, self.soup)
         xml = '<package>' \
               '<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">' \
               '<dc:title>Dracula (Barnes &amp; Noble Classics Series)</dc:title>' \
