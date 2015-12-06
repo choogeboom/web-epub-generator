@@ -26,7 +26,7 @@ class Container:
         """
         self.root_files.append(file)
 
-    def to_doc(self):
+    def to_document(self):
         """
         Turn the container into an XML document
         :return: The container document in a bs4.BeautifulSoup object
@@ -48,6 +48,12 @@ class Container:
 
 
 class PackageDocument:
+    """
+    Represents the package document in the EPUB
+
+    The package element is the root container of the Package Document and encapsulates
+    metadata and resource information for a Rendition.
+    """
 
     def __init__(self):
         self.version = "3.0"
@@ -62,9 +68,58 @@ class PackageDocument:
         self.bindings = None
         self.collection = []
 
+    def to_document(self):
+        soup = bs4.BeautifulSoup('<package xmlns:opf="http://www.idpf.org/2007/opf"/>',
+                                 'xml')
+        pack = soup.package
+        pack['version'] = self.version
+        pack['unique_identifier'] = self.unique_identifier
+        if self.prefix is not None:
+            pack['prefix'] = self.prefix
+        if self.language is not None:
+            pack['language'] = self.language
+        if self.text_direction is not None:
+            pack['xml:lang'] = self.language
+        if self.id is not None:
+            pack['id'] = self.id
+        self.meta_data.append_to_document(pack)
+        self.manifest.append_to_document(pack)
+
 
 class Manifest:
-    pass
+    """
+    Represents the manifest element of the EPUB package
+
+    The manifest element provides an exhaustive list of the Publication Resources that
+    constitute the given Rendition, each represented by an item element.
+    """
+    def __init__(self):
+        self.id = None
+        self.items = []
+
+
+class Item:
+    """
+    The item element represents a Publication Resource, such as a chapter
+    """
+    def __init__(self):
+        self.id = ''
+        self.href = ''
+        self.media_type = ''
+        self.fallback = ''
+        self.properties = []
+        self.media_overlay = None
+
+    def append_to_document(self, parent, soup):
+        tag = soup.new_tag("item", id=self.id, href=self.href, media_type=self.media_type)
+        if self.fallback is not None:
+            tag['fallback'] = self.fallback
+        if len(self.properties) > 0:
+            tag['properties'] = ' '.join(self.properties)
+        if self.media_overlay is not None:
+            tag['media-overlay'] = self.media_overlay
+        parent.append(tag)
+
 
 
 class Spine:
