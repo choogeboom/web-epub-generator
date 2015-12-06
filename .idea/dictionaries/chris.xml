@@ -2,10 +2,12 @@
   <dictionary name="chris">
     <words>
       <w>epub</w>
+      <w>hrefs</w>
       <w>mimetype</w>
       <w>oebps</w>
       <w>opendocument</w>
       <w>rootfile</w>
+      <w>rootfiles</w>
       <w>xmlns</w>
     </words>
   </dictionary>

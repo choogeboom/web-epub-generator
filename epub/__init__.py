@@ -44,8 +44,7 @@ class Container:
         return doc
 
     def __str__(self):
-        doc = self.to_doc()
-        return doc.prettify()
+        return self.to_document().prettify()
 
 
 class PackageDocument:
@@ -83,8 +82,8 @@ class PackageDocument:
             pack['xml:lang'] = self.language
         if self.id is not None:
             pack['id'] = self.id
-        self.meta_data.append_to_document(pack)
-        self.manifest.append_to_document(pack)
+        self.meta_data.append_to_document(pack, soup)
+        self.manifest.append_to_document(pack, soup)
 
 
 class Manifest:
@@ -97,6 +96,14 @@ class Manifest:
     def __init__(self):
         self.id = None
         self.items = []
+
+    def append_to_document(self, parent, soup):
+        tag = soup.new_tag('manifest')
+        parent.append(tag)
+        if self.id is not None:
+            tag['id'] = self.id
+        for item in self.items:
+            item.append_to_document(tag, soup)
 
 
 class Item(util.SetGet):
@@ -123,7 +130,6 @@ class Item(util.SetGet):
             tag['properties'] = ' '.join(self.properties)
         if self.media_overlay is not None:
             tag['media-overlay'] = self.media_overlay
-
 
 
 class Spine:
