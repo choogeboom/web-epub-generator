@@ -54,6 +54,16 @@ class SpineTest(unittest.TestCase):
               '</package>'
         self.assertEqual(xml, str(self.parent))
 
+    def test_append_item(self):
+        self.spine.append_item(epub.Item(id='item-id'))
+        self.spine.append_to_document(self.parent, self.soup)
+        xml = '<package>' \
+              '<spine>' \
+              '<itemref idref="item-id"/>' \
+              '</spine>' \
+              '</package>'
+        self.assertEqual(xml, str(self.parent))
+
 
 class ItemRefTest(unittest.TestCase):
     def setUp(self):

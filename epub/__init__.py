@@ -163,7 +163,7 @@ class ItemRef(util.SetGet):
      (typically EPUB Content Documents). The order of the itemref elements defines the
      default reading order of the given Rendition of the EPUB Publication.
     """
-    def __init__(self, item):
+    def __init__(self, item, **kwargs):
         self.item = item
         self.is_primary = None
         self.id = None
@@ -173,6 +173,7 @@ class ItemRef(util.SetGet):
         self.orientation = None
         self.page_spread = None
         self.spread_condition = None
+        self.set(**kwargs)
 
     def append_to_document(self, parent, soup):
         tag = soup.new_tag('itemref')
@@ -216,6 +217,11 @@ class Spine(util.SetGet):
         self.itemrefs = []
         self.set(**kwargs)
 
+    def append_item(self, item, **kwargs):
+        itemref = ItemRef(item, **kwargs)
+        self.itemrefs.append(itemref)
+        return itemref
+
     def append_to_document(self, parent, soup):
         tag = soup.new_tag('spine')
         parent.append(tag)
@@ -227,6 +233,10 @@ class Spine(util.SetGet):
             tag['page-progression-direction'] = self.page_progression_direction
         for itemref in self.itemrefs:
             itemref.append_to_document(tag, soup)
+
+
+class Bindings(util.SetGet):
+    pass
 
 
 class EPub:
