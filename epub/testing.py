@@ -10,6 +10,49 @@ class PackageTest(unittest.TestCase):
 class SpineTest(unittest.TestCase):
     def setUp(self):
         self.spine = epub.Spine()
+        self.soup = bs4.BeautifulSoup('<package/>', 'xml')
+        self.parent = self.soup.package
+
+    def test_basic(self):
+        self.spine.append_to_document(self.parent, self.soup)
+        xml = '<package>' \
+              '<spine/>' \
+              '</package>'
+        self.assertEqual(xml, str(self.parent))
+
+    def test_id(self):
+        self.spine.id = 'test-id'
+        self.spine.append_to_document(self.parent, self.soup)
+        xml = '<package>' \
+              '<spine id="test-id"/>' \
+              '</package>'
+        self.assertEqual(xml, str(self.parent))
+
+    def test_toc(self):
+        self.spine.toc = 'ncx'
+        self.spine.append_to_document(self.parent, self.soup)
+        xml = '<package>' \
+              '<spine toc="ncx"/>' \
+              '</package>'
+        self.assertEqual(xml, str(self.parent))
+
+    def test_page_progression_direction(self):
+        self.spine.page_progression_direction = 'ltr'
+        self.spine.append_to_document(self.parent, self.soup)
+        xml = '<package>' \
+              '<spine page-progression-direction="ltr"/>' \
+              '</package>'
+        self.assertEqual(xml, str(self.parent))
+
+    def test_itemrefs(self):
+        self.spine.itemrefs = [epub.ItemRef(epub.Item(id='item-id'))]
+        self.spine.append_to_document(self.parent, self.soup)
+        xml = '<package>' \
+              '<spine>' \
+              '<itemref idref="item-id"/>' \
+              '</spine>' \
+              '</package>'
+        self.assertEqual(xml, str(self.parent))
 
 
 class ItemRefTest(unittest.TestCase):

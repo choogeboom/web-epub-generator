@@ -189,17 +189,17 @@ class ItemRef(util.SetGet):
         if self.is_x_aligned_center:
             properties.append('rendition:align-x-center')
         if self.flow_mode is not None:
-            properties.append('rendition:flow-' + self.flow_mode)
+            properties.append('rendition:flow-{}'.format(self.flow_mode))
         if self.layout_mode is not None:
-            properties.append('rendition:layout-' + self.layout_mode)
+            properties.append('rendition:layout-{}'.format(self.layout_mode))
         if self.orientation is not None:
-            properties.append('rendition:orientation-' + self.orientation)
+            properties.append('rendition:orientation-{}'.format(self.orientation))
         if self.page_spread == 'center':
             properties.append('rendition:page-spread-center')
         elif self.page_spread in ['left', 'right']:
-            properties.append('page-spread-' + self.page_spread)
+            properties.append('page-spread-{}'.format(self.page_spread))
         if self.spread_condition is not None:
-            properties.append('rendition:spread-' + self.spread_condition)
+            properties.append('rendition:spread-{}'.format(self.spread_condition))
         if len(properties) > 0:
             tag['properties'] = ' '.join(properties)
 
@@ -212,8 +212,21 @@ class Spine(util.SetGet):
     def __init__(self, **kwargs):
         self.id = None
         self.toc = None
-        self.page_progression_direction = 'default'
+        self.page_progression_direction = None
+        self.itemrefs = []
         self.set(**kwargs)
+
+    def append_to_document(self, parent, soup):
+        tag = soup.new_tag('spine')
+        parent.append(tag)
+        if self.id is not None:
+            tag['id'] = self.id
+        if self.toc is not None:
+            tag['toc'] = self.toc
+        if self.page_progression_direction is not None:
+            tag['page-progression-direction'] = self.page_progression_direction
+        for itemref in self.itemrefs:
+            itemref.append_to_document(tag, soup)
 
 
 class EPub:
