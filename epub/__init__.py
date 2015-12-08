@@ -86,16 +86,17 @@ class PackageDocument:
         self.manifest.append_to_document(pack, soup)
 
 
-class Manifest:
+class Manifest(util.SetGet):
     """
     Represents the manifest element of the EPUB package
 
     The manifest element provides an exhaustive list of the Publication Resources that
     constitute the given Rendition, each represented by an item element.
     """
-    def __init__(self):
+    def __init__(self, **kwargs):
         self.id = None
         self.items = []
+        self.set(**kwargs)
 
     def append_to_document(self, parent, soup):
         tag = soup.new_tag('manifest')
@@ -115,8 +116,14 @@ class Item(util.SetGet):
         self.href = ''
         self.media_type = ''
         self.fallback = None
-        self.properties = []
         self.media_overlay = None
+        self.is_cover_image = False
+        self.is_mathml = False
+        self.is_nav = False
+        self.has_remote_resources = False
+        self.is_scripted = False
+        self.is_svg = False
+        self.is_switch = False
         self.set(**kwargs)
 
     def append_to_document(self, parent, soup):
@@ -126,14 +133,87 @@ class Item(util.SetGet):
         if self.fallback is not None:
             tag['fallback'] = self.fallback.id
             self.fallback.append_to_document(parent, soup)
-        if len(self.properties) > 0:
-            tag['properties'] = ' '.join(self.properties)
+        self.append_properties(tag)
         if self.media_overlay is not None:
             tag['media-overlay'] = self.media_overlay
 
+    def append_properties(self, tag):
+        properties = []
+        if self.is_cover_image:
+            properties.append('cover-image')
+        if self.is_mathml:
+            properties.append('mathml')
+        if self.is_nav:
+            properties.append('nav')
+        if self.has_remote_resources:
+            properties.append('remote-resources')
+        if self.is_scripted:
+            properties.append('scripted')
+        if self.is_svg:
+            properties.append('svg')
+        if self.is_switch:
+            properties.append('switch')
+        if len(properties) > 0:
+            tag['properties'] = ' '.join(properties)
 
-class Spine:
-    pass
+
+class ItemRef(util.SetGet):
+    """
+     itemref elements of the spine represent a sequential list of Publication Resources
+     (typically EPUB Content Documents). The order of the itemref elements defines the
+     default reading order of the given Rendition of the EPUB Publication.
+    """
+    def __init__(self, item):
+        self.item = item
+        self.is_primary = None
+        self.id = None
+        self.is_x_aligned_center = False
+        self.flow_mode = None
+        self.layout_mode = None
+        self.orientation = None
+        self.page_spread = None
+        self.spread_condition = None
+
+    def append_to_document(self, parent, soup):
+        tag = soup.new_tag('itemref')
+        tag['idref'] = self.item.id
+        parent.append(tag)
+        if self.is_primary is not None:
+            tag['linear'] = 'yes' if self.is_primary else 'no'
+        if self.id is not None:
+            tag['id'] = self.id
+        self.append_properties(tag)
+
+    def append_properties(self, tag):
+        properties = []
+        if self.is_x_aligned_center:
+            properties.append('rendition:align-x-center')
+        if self.flow_mode is not None:
+            properties.append('rendition:flow-' + self.flow_mode)
+        if self.layout_mode is not None:
+            properties.append('rendition:layout-' + self.layout_mode)
+        if self.orientation is not None:
+            properties.append('rendition:orientation-' + self.orientation)
+        if self.page_spread == 'center':
+            properties.append('rendition:page-spread-center')
+        elif self.page_spread in ['left', 'right']:
+            properties.append('page-spread-' + self.page_spread)
+        if self.spread_condition is not None:
+            properties.append('rendition:spread-' + self.spread_condition)
+        if len(properties) > 0:
+            tag['properties'] = ' '.join(properties)
+
+
+class Spine(util.SetGet):
+    """
+    The spine element defines the default reading order of the given Rendition of the
+    EPUB Publication content by defining an ordered list of manifest item references.
+    """
+    def __init__(self, **kwargs):
+        self.id = None
+        self.toc = None
+        self.page_progression_direction = 'default'
+        self.set(**kwargs)
 
 
 class EPub:

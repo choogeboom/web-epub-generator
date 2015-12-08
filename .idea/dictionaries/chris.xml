@@ -3,6 +3,9 @@
     <words>
       <w>epub</w>
       <w>hrefs</w>
+      <w>idref</w>
+      <w>itemref</w>
+      <w>mathml</w>
       <w>mimetype</w>
       <w>oebps</w>
       <w>opendocument</w>
