@@ -2,6 +2,8 @@
 For building and editing EPUB books
 """
 import bs4
+import os
+import re
 from epub import meta
 from epub import util
 
@@ -236,13 +238,20 @@ class Spine(util.SetGet):
 
 
 class Bindings(util.SetGet):
+    """
+    TODO
+    """
     pass
 
 
-class EPub:
+class EPub(util.SetGet):
 
-    def __init__(self):
+    def __init__(self, **kwargs):
         self.container = Container()
+        self.package_document = PackageDocument()
+        self.book = Book()
+        self.path = os.path.expanduser('~/generated_epubs')
+        self.set(**kwargs)
 
     @property
     def mimetype(self):
@@ -251,3 +260,100 @@ class EPub:
     @property
     def version(self):
         return "3.0.1"
+
+    @property
+    def directories(self):
+        return [self.root_dir,
+                self.meta_inf_dir,
+                self.content_dir,
+                self.text_dir,
+                self.images_dir,
+                self.styles_dir]
+
+    @property
+    def root_dir(self):
+        title = self.package_document.meta_data.titles[0].casefold()
+        return "{}/{}".format(self.path, re.sub("[^a-z0-9]", "_", title))
+
+    @property
+    def meta_inf_dir(self):
+        return "{}/{}".format(self.root_dir, "META-INF")
+
+    @property
+    def content_dir(self):
+        return "{}/{}".format(self.root_dir, "CONTENT")
+
+    @property
+    def text_dir(self):
+        return "{}/{}".format(self.content_dir, "Text")
+
+    @property
+    def images_dir(self):
+        return "{}/{}".format(self.content_dir, "Images")
+
+    @property
+    def styles_dir(self):
+        return "{}/{}".format(self.content_dir, "Styles")
+
+    def generate(self):
+        self.create_directory_structure()
+        self.write_mimetype()
+        self.process_book()
+        self.write_container()
+        self.write_package_document()
+        self.write_table_of_contents()
+
+    def create_directory_structure(self):
+        for directory in self.directories:
+            os.makedirs(directory, exist_ok=True)
+
+    def write_mimetype(self):
+        pass
+
+    def process_book(self):
+        pass
+
+    def write_container(self):
+        pass
+
+    def write_package_document(self):
+        pass
+
+    def write_table_of_contents(self):
+        pass
+
+
+class Book:
+    """
+    An iterable class for chapters a book
+    """
+
+    def __init__(self, chapter_type, first_chapter):
+        self.chapter_type = chapter_type
+        self.first_chapter = first_chapter
+        self.current_chapter = None
+
+    def __iter__(self):
+        self.current_chapter = None
+        return self
+
+    def __next__(self):
+        if self.current_chapter is None:
+            self.current_chapter = self.first_chapter
+        else:
+            self.current_chapter = self.current_chapter.__next__()
+        return self.current_chapter
+
+
+class Chapter(util.SetGet):
+    """
+    Stores chapter data
+    """
+    def __init__(self):
+        self.content = None
+
+    def write(self, path):
+        pass
+
+    def __next__(self):
+        pass

@@ -1,0 +1,43 @@
+Some notes on the EPUB structure
+
+ROOT/
+    mimetype
+        application/epub+zip
+    META-INF/
+        container.xml
+            <container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container">
+                <rootfiles>
+                    <rootfile full-path="CONTENT/content.opf"
+                        media-type="application/oebps-package+xml" />
+                </rootfiles>
+            </container>
+    CONTENT/
+        content.opf
+            <package>
+                <metadata>
+                    <meta data stuff/>
+                </metadata>
+                <manifest>
+                    <item href="toc.ncx" id="ncx"/>
+                    <item href="Text/title.xhtml" id="title.xhtml"/>
+                    <item href="Text/chapter_01.xhtml" id="chapter_01.xhtml"/>
+                </manifest>
+                <spine toc="ncx">
+                    <itemref idref="title.xhtml"/>
+                    <itemref idref="chapter_01.xhtml"/>
+                </spine>
+            </package>
+        Text/
+            chapter_01.xhtml
+                <html xmlns:epub="http://www.idpf.org/2007/ops">
+                    <head>
+                    </head>
+                    <body>
+                    </body>
+                </html>
+            title.xhtml
+        Images/
+            ch1-pic.png
+        Styles/
+            style.css
+        toc.ncx
