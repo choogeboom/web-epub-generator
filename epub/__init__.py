@@ -6,6 +6,7 @@ import os
 import re
 import abc
 import copy
+import shutil
 import urllib.parse
 from epub import meta
 from epub import util
@@ -72,10 +73,15 @@ class PackageDocument:
         self.spine = Spine()
         self.bindings = None
         self.collection = []
+        self.path = 'content.opf'
 
     def register_chapter(self, chapter):
         item = self.manifest.register_chapter(chapter.path)
         self.spine.append_item(item)
+
+    def register_table_of_contents(self, table_of_contents):
+        item = self.manifest.register_table_of_contents(table_of_contents)
+        self.spine.toc = item.id
 
     def to_document(self):
         soup = bs4.BeautifulSoup('<package xmlns:opf="http://www.idpf.org/2007/opf"/>',
@@ -93,6 +99,14 @@ class PackageDocument:
             pack['id'] = self.id
         self.meta_data.append_to_document(pack, soup)
         self.manifest.append_to_document(pack, soup)
+        self.spine.append_to_document(pack, soup)
+        return soup
+
+    def write(self, base_dir):
+        doc = self.to_document()
+        file_name = '{}/{}'.format(base_dir, self.path)
+        with open(file_name, 'w') as f:
+            print(doc.prettify(formatter="html"), file=f)
 
 
 class Manifest(util.SetGet):
@@ -107,12 +121,25 @@ class Manifest(util.SetGet):
         self.items = []
         self.set(**kwargs)
 
-    def register_chapter(self, chapter_path: str):
+    def register_chapter(self, chapter_path):
         parts = chapter_path.split('/')
         chapter_id = parts[-1]
-        item = Item(href=chapter_path, id=chapter_id)
+        item = Item(href=chapter_path, id=chapter_id, media_type='application/xhtml+xml')
         self.items.append(item)
         return item
+
+    def register_table_of_contents(self, toc):
+        parts = toc.path_v2.split('/')
+        toc_id_v2 = parts[-1]
+        item_v2 = Item(href=toc.path_v2, id=toc_id_v2,
+                       media_type="application/x-dtbncx+xml")
+        self.items.append(item_v2)
+        parts = toc.path_v3.split('/')
+        toc_id_v3 = parts[-1]
+        item_v3 = Item(href=toc.path_v3, id=toc_id_v3, is_nav=True,
+                       media_type='application/xhtml+xml')
+        self.items.append(item_v3)
+        return item_v2
 
     def append_to_document(self, parent, soup):
         tag = soup.new_tag('manifest')
@@ -262,7 +289,7 @@ class EPub(util.SetGet):
 
     def __init__(self, **kwargs):
         self.container = Container()
-        self.book = None
+        self.books = []
         self.path = None
         self.set(**kwargs)
         if self.path is None:
@@ -287,7 +314,7 @@ class EPub(util.SetGet):
 
     @property
     def root_dir(self):
-        title = self.package_document.meta_data.titles[0].casefold()
+        title = self.books[0].title.casefold()
         return "{}/{}".format(self.path, re.sub("[^a-z0-9]", "_", title))
 
     @property
@@ -313,29 +340,36 @@ class EPub(util.SetGet):
     def generate(self):
         self.create_directory_structure()
         self.write_mimetype()
-        self.process_book()
+        self.process_books()
         self.write_container()
-        self.write_package_document()
-        self.write_table_of_contents()
+        self.compress()
 
     def create_directory_structure(self):
+        shutil.rmtree(self.root_dir, ignore_errors=True)
         for directory in self.directories:
             os.makedirs(directory, exist_ok=True)
 
     def write_mimetype(self):
-        pass
+        mimetype_file = "{}/{}".format(self.root_dir, "mimetype")
+        with open(mimetype_file, 'w') as f:
+            print("application/epub+zip", file=f)
 
-    def process_book(self):
-        pass
+    def process_books(self):
+        for book_num, book in enumerate(self.books):
+            book.base_path = self.content_dir
+            book.specific_path = 'content_{}.opf'.format(book_num)
+            self.container.register_rendition('CONTENT/{}'.format(book.specific_path))
+            book.process()
 
     def write_container(self):
-        pass
+        container_file = "{}/{}".format(self.meta_inf_dir, "container.xml")
+        with open(container_file, 'w') as f:
+            print(str(self.container), file=f)
 
-    def write_package_document(self):
-        pass
-
-    def write_table_of_contents(self):
-        pass
+    def compress(self):
+        zip_name = shutil.make_archive(self.root_dir, 'zip', self.root_dir)
+        shutil.move(zip_name, '{}.epub'.format(self.root_dir))
+        shutil.rmtree(self.root_dir, ignore_errors=True)
 
 
 class Book(util.SetGet):
@@ -345,34 +379,39 @@ class Book(util.SetGet):
 
     def __init__(self, first_chapter, **kwargs):
         self.package_document = PackageDocument()
-        self.table_of_contents = TableOfContents()
+        self.table_of_contents = TableOfContents(self)
         self.base_path = None
         self.specific_path = 'content.opf'
         self._current_chapter_index = 0
         self._chapters = [TitleChapter(self), first_chapter]
+        self.set(**kwargs)
+
+    def process(self):
+        self.process_chapters()
+        self.package_document.register_table_of_contents(self.table_of_contents)
+        self.package_document.write(self.base_path)
+        self.table_of_contents.write(self.base_path)
 
     def process_chapters(self):
         for chapter_num, chapter in enumerate(self):
-            chapter.path = 'Text/chapter_{}.xhtml'.format(chapter_num)
-            self.register_chapter(chapter)
-            self.write_chapter(chapter)
+            chapter.number = chapter_num
+            self.package_document.register_chapter(chapter)
+            chapter.write(self.base_path)
 
-    def register_chapter(self, chapter):
-        self.package_document.register_chapter(chapter)
-        self.table_of_contents.register_chapter(chapter)
+    @property
+    def specific_path(self):
+        return self.package_document.path
 
-    def write_chapter(self, chapter, chapter_path):
-        chapter_file_path = "{}/{}".format(self.base_path, chapter_path)
-        chapter.write(chapter_file_path)
+    @specific_path.setter
+    def specific_path(self, value):
+        self.package_document.path = value
 
     @property
     def title(self):
-        return self.get_title()
-
-    def get_title(self):
         return self.package_document.meta_data.titles[0].value
 
-    def set_title(self, title):
+    @title.setter
+    def title(self, title):
         self.package_document.meta_data.titles[0].value = title
 
     def __iter__(self):
@@ -407,18 +446,90 @@ class Book(util.SetGet):
 
 
 class TableOfContents:
+    _DEFAULT_XML_V2 = """
+        <ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1" xml:lang="en-US">
+          <head/>
+          <docTitle/>
+          <navMap/>
+        </ncx>"""
 
-    def __init__(self):
+    _DEFAULT_XML_V3 = """
+        <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">\
+          <head>
+            <title/>
+          </head>
+          <body>
+            <nav epub:type="toc">
+              <h1>Table of Contents</h1>
+              <ol/>
+            </nav>
+          </body>
+        </html>"""
+
+    def __init__(self, book):
+        self.book = book
         self.chapters = []
 
-    def register_chapter(self, chapter, chapter_path):
-        self.chapters.append((chapter, chapter_path))
+    @property
+    def path_v2(self):
+        return 'toc.ncx'
+
+    @property
+    def path_v3(self):
+        return 'toc.xhtml'
+
+    def register_chapter(self, chapter):
+        self.chapters.append(chapter)
 
     def generate_version_2_document(self):
-        pass
+        soup = bs4.BeautifulSoup(self._DEFAULT_XML_V2, 'xml')
+        title_tag = soup.new_tag('text')
+        soup.ncx.docTitle.append(title_tag)
+        title_tag.append(bs4.NavigableString(self.book.title))
+        parent = soup.ncx.navMap
+        for chapter in self.book:
+            self.append_chapter_to_document_v2(chapter, parent, soup)
+        return soup
+
+    @staticmethod
+    def append_chapter_to_document_v2(chapter, parent, soup):
+        nav_point = soup.new_tag('navPoint', playOrder=chapter.number+1)
+        parent.append(nav_point)
+        nav_label = soup.new_tag('navLabel')
+        nav_point.append(nav_label)
+        text = soup.new_tag('text')
+        nav_label.append(text)
+        text.append(bs4.NavigableString(chapter.title))
+        content = soup.new_tag('content', src=chapter.path)
+        nav_point.append(content)
 
     def generate_version_3_document(self):
-        pass
+        soup = bs4.BeautifulSoup(self._DEFAULT_XML_V3, 'xml')
+        soup.head.title.append(bs4.NavigableString(self.book.title))
+        parent = soup.html.body.nav.ol
+        for chapter in self.book:
+            self.append_chapter_to_document_v3(chapter, parent, soup)
+        return soup
+
+    @staticmethod
+    def append_chapter_to_document_v3(chapter, parent, soup):
+        li = soup.new_tag('li')
+        parent.append(li)
+        a = soup.new_tag('a', href=chapter.path)
+        li.append(a)
+        a.append(bs4.NavigableString(chapter.title))
+
+    def write(self, base_dir):
+        doc_v2 = self.generate_version_2_document()
+        file_name = '{}/{}'.format(base_dir, self.path_v2)
+        print('Writing Table of Contents as "{}".'.format(file_name))
+        with open(file_name, 'w') as f:
+            print(doc_v2.prettify(formatter="html"), file=f)
+        doc_v3 = self.generate_version_3_document()
+        file_name = '{}/{}'.format(base_dir, self.path_v3)
+        print('Writing Table of Contents as "{}".'.format(file_name))
+        with open(file_name, 'w') as f:
+            print(doc_v3.prettify(formatter="html"), file=f)
 
 
 class Chapter(util.SetGet, metaclass=abc.ABCMeta):
@@ -427,14 +538,18 @@ class Chapter(util.SetGet, metaclass=abc.ABCMeta):
     """
     _DEFAULT_XHTML = '\
         <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">\
-          <head><title></title></head>\
+          <head><title></title><link rel="stylesheet" ' \
+                     'href="../Styles/default_style.css" type="text/css"/></head>\
           <body><h1></h1></body>\
         </html>\
         '
 
-    def __init__(self):
-        self.path = ''
-        pass
+    def __init__(self, number=0):
+        self.number = number
+
+    @property
+    def path(self):
+        return 'Text/chapter_{:03}.xhtml'.format(self.number)
 
     @property
     def title(self) -> bs4.Tag:
@@ -466,8 +581,9 @@ class Chapter(util.SetGet, metaclass=abc.ABCMeta):
         """
         doc = self.create_document()
         file_name = '{}/{}'.format(base_directory, self.path)
+        print('Writing Chapter "{}" as "{}".'.format(self.title, file_name))
         with open(file_name, 'w') as f:
-            print(doc.prettify(formatter="html"), file=f)
+            print(doc.prettify(formatter="minimal"), file=f)
 
     @abc.abstractmethod
     def get_title(self) -> str:
@@ -560,7 +676,7 @@ class TitleChapter(Chapter):
         return self.book[1]
 
     def get_title(self) -> str:
-        return self.book.get_title()
+        return self.book.title
 
     def get_content(self):
         return bs4.Tag(name='div')

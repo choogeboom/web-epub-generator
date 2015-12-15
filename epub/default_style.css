@@ -1,0 +1,464 @@
+/* ePub Modern 2
+ *
+ * Copyright (C) 2009 Reece H. Dunn [mailto:msclrhd@gmail.com]
+ *
+ * Released under the Creative Commons Attribution-Share Alike 2.0 UK: England
+ * & Wales Licence [http://creativecommons.org/licenses/by-sa/2.0/uk/].
+ *
+ * The idea behind this stylesheet is to create a simple, modern layout for ePub
+ * documents.
+ */
+
+body {
+	font: 100% 'PT Serif', serif;
+	color: #222;
+	-webkit-font-variant-ligatures: no-common-ligatures;
+	font-variant-ligatures: no-common-ligatures;
+/*	line-height: 1.4em;
+	line-height: 140%;
+*/
+	background: #fff;
+	padding: 0;
+	margin: 0;
+/*	width: 40em;
+	margin: auto;
+	padding: 0 30px;
+	box-shadow: 0 0 8px #ccc;*/
+}
+
+#bglines { background: #fff url('bg_lines.png'); }
+
+/*html { background: #eee url('bg.png'); }*/
+
+#content
+{
+	background-color: white;
+	color: black;
+	font-family: 'PT Serif',
+		serif;
+	text-align: left;
+	padding: .5em;
+}
+
+#content h1, #chapter-title, h1
+{
+	text-align: center;
+	font: 2.4em 'PT Sans', Georgia;
+	color: #222;
+	padding-bottom: 80px;
+	background: url('fleur.png') no-repeat center bottom;
+	max-width: 18em;
+	margin: 0 auto;
+}
+
+h1#logo {
+	background: url('hpmor_logo.png') no-repeat center bottom;
+	text-indent: -9000px;
+	height: 300px;
+	margin: 0 auto 10px auto;
+	padding: 0;
+}
+
+#bookcover {
+	float: left;
+	margin-right: 20px;
+	margin-left: 20px;
+	padding-bottom: 10px;
+}
+
+#bookcover img {
+	-moz-box-shadow: 2px 2px 2px #aaa;
+	-webkit-box-shadow: 2px 2px 2px #aaa;
+	box-shadow: 2px 2px 2px #aaa;
+}
+
+
+
+#storycontent a, #storycontent a:link {
+	color: #ca9300;
+	text-decoration: none;
+	border-bottom: 2px dotted #e3cc8e;
+	line-height: 1.7em;
+}
+
+#storycontent a:hover {
+	background: #d8a63a;
+	color: white;
+	border: none;
+	padding: 2px 0;
+}
+
+#bookcover a, #bookcover a:link, #bookcover a:hover {
+    text-decoration: none;
+    border: none;
+    background: white;
+}
+
+
+.clear { clear: both; }
+.clearleft { clear: left; }
+
+#updates, .content { max-width: 41em; text-align: left; margin: 0 auto; }
+
+#latest-note { float: right; padding-top: .5em; }
+#latest-chapter { float: left; padding-top: .5em; }
+
+.toc {
+	font-size: 2em;
+	margin: 10px 0 0 30px;
+}
+
+.aboutthebook  {
+	margin-bottom: 20px;
+	margin-top: 20px;
+}
+
+.aboutthebook:before,
+.aboutthebook:after{ content:""; display:table; }
+.aboutthebook:after {clear: both;}
+.aboutthebook {zoom: 1;} /* IE < 8 */
+
+
+#content h2
+{
+	text-align: center;
+	font-size: 2em;
+}
+
+
+#content h3
+{
+	font-size: 1.5em;
+	text-align: right;
+	margin-top: 3em;
+	margin-bottom: 2em;
+	color: navy;
+}
+
+#content h1 a, #content h2 a, #content h3 a {
+	color: navy;
+	text-decoration: none;
+}
+
+blockquote
+{
+	margin-left: 5em;
+	margin-right: 5em;
+}
+
+blockquote .attribution
+{
+	display: block;
+	text-align: right;
+}
+
+p
+{
+/*	text-indent: 1.5em; -- FIXME*/
+	margin: 0;
+	/* margin-bottom: .25em; -- FIXME */
+	margin-top: .75em;
+	margin-bottom: .75em;
+}
+
+#title-page p, #title-page h1, #title-page h2 {
+	text-align: center;
+	text-indent: 0;
+}
+
+
+p.first, p.noindent, blockquote p
+{
+	text-indent: 0;
+}
+
+
+p.noindent span.first-three {
+	text-transform: uppercase;
+	font-size: 75%;
+}
+
+p.noindent:first-letter {
+	font-size: 120%;
+}
+
+p.section-break, div.sep, div.sep2
+{
+	text-align: center;
+/* -- FIXME
+	padding-top: 2em;
+	padding-bottom: 2em;
+*/
+	padding-top: .5em;
+	padding-bottom: .5em;
+	background: url('/hr.png') no-repeat center center; }
+}
+
+/* -- FIXME
+
+div.sep { background: url('divider-new2.png') no-repeat center center; }
+div.sep2 { background: url('fleur.png') no-repeat center center; }
+div.sep3 { background: url('divider_long.png') no-repeat center center; padding: 1em 0; }
+*/
+
+span.section-break
+{
+	/* display: none; */
+}
+
+div.email
+{
+	font-family: "Courier New",
+		Courier,
+		monospace;
+	margin-left: 2em;
+	margin-right: 2em;
+	margin-top: 1em;
+	margin-bottom: 1em;
+	padding: .25em;
+	border: 1px solid black;
+}
+
+div.email p {
+	text-align: left;
+	text-indent: 0;
+}
+
+div.email p.email-from
+{
+	font-weight: bold;
+	margin-bottom: 1em;
+}
+
+#title-page a, #toc a
+{
+	text-decoration: none;
+}
+
+#toc table tr th
+{
+	width: 8em;
+	vertical-align: top;
+}
+
+#storycontent
+{
+	max-width: 42em;
+	margin-left: auto;
+	margin-right: auto;
+	margin-top: 2em;
+	line-height: 140%;
+}
+
+#nav-top, #nav-bottom
+{
+	text-align: center;
+}
+
+#nav-top {
+	border-bottom: 4px dotted #f5f5f5;
+	padding-bottom: .4em;
+	margin-bottom: 1.5em;
+	margin-top: 0px; /* .3em; */
+}
+
+#nav-bottom {
+	margin-top: 1.5em;
+	padding-top: 70px;
+	background: url('fleur.png') no-repeat center top;
+}
+
+form, input { display: inline; }
+
+.nav-prev, .nav-next, .nav-dropdown
+{
+	display: inline;
+	padding-left: .5em;
+	padding-right: .5em;
+}
+
+.nav-dropdown
+{
+	display: inline;
+}
+
+#footer, #reviews
+{
+	font-size: .8em;
+	margin-top: 1em;
+	border-top: 4px dotted #eee;
+	text-align: center;
+	padding: .2em 1em .5em 1em;
+}
+
+#reviews
+{
+	border-top: none;
+}
+
+#links {
+	float: right;
+	background: #f8f4e1;
+	padding: .7em;
+	margin-top: 10px;
+}
+
+#links h3 {
+	margin: 0px;
+}
+#links ul
+{
+	margin: 0px;
+	padding-left: 1em;
+	padding-top: .5em;
+}
+
+#updates a, #updates a:link {
+	border-bottom: none;
+}
+
+#updates a:hover {
+	color: #ca9300;
+	background: none;
+	border-bottom: 2px dotted #e3cc8e;
+}
+
+#resizer {
+	position: absolute;
+	top: 2px;
+	right: 2px;
+	background: #fff;
+	border: 1px solid #ccc;
+	text-align: center;
+}
+
+#resizer div {
+	position: relative;
+	padding-left: 3px;
+	padding-right: 3px;
+	padding-top: 0px;
+	padding-bottom: 0px;
+}
+
+#resizer div a span
+{
+  position:absolute;
+  width:100%;
+  height:100%;
+  top:0;
+  left: 0;
+
+  /* edit: added z-index */
+  z-index: 1
+}
+
+#resizer a, #resizer a:hover {
+	text-decoration: none;
+	border: none;
+	background: #fff;
+	color: #000;
+}
+
+#resizer #smaller a {
+	font-size: 50%;
+}
+
+#resizer #original a, #resizer #inverter a {
+	font-size: 75%;
+}
+
+#inverter, #inverter a, #inverter a:hover {
+	background: #000;
+	color: #fff;
+}
+
+
+/* WP Navbar temp */
+
+#access {
+	background: #222; /* Show a solid color for older browsers */
+	background: -moz-linear-gradient(#252525, #0a0a0a);
+	background: -o-linear-gradient(#252525, #0a0a0a);
+	background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#252525), to(#0a0a0a)); /* older webkit syntax */
+	background: -webkit-linear-gradient(#252525, #0a0a0a);
+	-webkit-box-shadow: rgba(0, 0, 0, 0.4) 0px 1px 2px;
+	-moz-box-shadow: rgba(0, 0, 0, 0.4) 0px 1px 2px;
+	box-shadow: rgba(0, 0, 0, 0.4) 0px 1px 2px;
+	clear: both;
+	display: block;
+	float: left;
+	margin: 0 auto 6px;
+	width: 100%;
+}
+#access ul {
+	font-size: 13px;
+	list-style: none;
+	margin: 0 0 0 -0.8125em;
+	padding-left: 0;
+}
+#access li {
+	float: left;
+	position: relative;
+}
+#access a {
+	color: #eee;
+	display: block;
+	line-height: 3.333em;
+	padding: 0 1.2125em;
+	text-decoration: none;
+}
+#access ul ul {
+	-moz-box-shadow: 0 3px 3px rgba(0,0,0,0.2);
+	-webkit-box-shadow: 0 3px 3px rgba(0,0,0,0.2);
+	box-shadow: 0 3px 3px rgba(0,0,0,0.2);
+	display: none;
+	float: left;
+	margin: 0;
+	position: absolute;
+	top: 3.333em;
+	left: 0;
+	width: 188px;
+	z-index: 99999;
+}
+#access ul ul ul {
+	left: 100%;
+	top: 0;
+}
+#access ul ul a {
+	background: #f9f9f9;
+	border-bottom: 1px dotted #ddd;
+	color: #444;
+	font-size: 13px;
+	font-weight: normal;
+	height: auto;
+	line-height: 1.4em;
+	padding: 10px 10px;
+	width: 168px;
+}
+#access li:hover > a,
+#access ul ul :hover > a,
+#access a:focus {
+	background: #efefef;
+}
+#access li:hover > a,
+#access a:focus {
+	background: #f9f9f9; /* Show a solid color for older browsers */
+	background: -moz-linear-gradient(#f9f9f9, #e5e5e5);
+	background: -o-linear-gradient(#f9f9f9, #e5e5e5);
+	background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#f9f9f9), to(#e5e5e5)); /* Older webkit syntax */
+	background: -webkit-linear-gradient(#f9f9f9, #e5e5e5);
+	color: #373737;
+}
+#access ul li:hover > ul {
+	display: block;
+}
+#access .current-menu-item > a,
+#access .current-menu-ancestor > a,
+#access .current_page_item > a,
+#access .current_page_ancestor > a {
+	font-weight: bold;
+}
+
+#invertable {
+	background: white;
+}
