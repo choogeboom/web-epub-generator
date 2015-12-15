@@ -24,13 +24,32 @@ class HPMoRChapter(epub.WebChapter):
 def generate_epub(path=None):
     first_chapter = HPMoRChapter(url='http://hpmor.com/chapter/1')
     book = epub.Book(first_chapter=first_chapter)
+    book.title = 'Harry Potter and the Methods of Rationality'
+    volume = epub.EPub()
+    volume.books.append(book)
+    creator = epub.meta.Creator(value='Eliezer Yudkowsky',
+                                file_as='Yudkowsky, Eliezer',
+                                scheme='marc:relators',
+                                role='aut')
+    transcriber = epub.meta.Contributor(value='Christopher Hoogeboom',
+                                        file_as='Hoogeboom, Christopher',
+                                        scheme='mark:relators',
+                                        role='trc')
+    description = epub.meta.Description(value='Petunia married a biochemist, and Harry '
+                                              'grew up reading science and science '
+                                              'fiction. Then came the Hogwarts letter, '
+                                              'and a world of intriguing new '
+                                              'possibilities to exploit. And new '
+                                              'friends, like Hermione Granger, '
+                                              'and Professor McGonagall, and Professor '
+                                              'Quirrell... ')
+    book.package_document.meta_data.creators.append(creator)
+    book.package_document.meta_data.contributors.append(transcriber)
+    book.package_document.meta_data.descriptions.append(description)
+    volume.generate()
+    return volume
 
-                     # chapter_type=HPMoR,
-                     # init_url="http://hpmor.com/chapter/1",
-                     # title="Harry Potter and the Methods of Rationality",
-                     # author="Eliezer Yudkowsky")
-    for chapter in book:
-        print(chapter.title)
-    return book
+if __name__ == "__main__":
+    generate_epub()
 
 
