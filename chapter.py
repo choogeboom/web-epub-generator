@@ -30,7 +30,7 @@ class HPMoRChapter(epub.WebChapter):
         return None if anchor is None else self.fix_url(anchor["href"])
 
 
-wildbow_chapter_regex = re.compile(r'(Last|Next) Chapter')
+wildbow_chapter_regex = re.compile(r'(Last|Next)')
 
 
 class WildbowChapter(epub.WebChapter):
@@ -58,5 +58,5 @@ class WildbowChapter(epub.WebChapter):
         return None
 
     def get_next_chapter_url(self) -> str:
-        anchor = self.parsed_html.find("a", string='Next Chapter')
+        anchor = self.parsed_html.find("a", string=re.compile('Next'))
         return None if anchor is None else self.fix_url(anchor['href'])
