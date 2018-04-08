@@ -33,7 +33,6 @@ def generate_epub(path=None):
               'to day life.  Of those children, a small group of strange youths from the '
               'Lambsbridge Orphanage stand out, taking a more direct hand in events.')
     book.package_document.meta_data.creators.append(creator)
-    book.package_document.meta_data.contributors.append(transcriber)
     book.package_document.meta_data.descriptions.append(description)
     volume.generate()
     return volume

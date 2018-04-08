@@ -49,7 +49,6 @@ def generate_epub(path=None):
               'older people can’t.  Use your own judgement, because you know '
               'yourself best.')
     book.package_document.meta_data.creators.append(creator)
-    book.package_document.meta_data.contributors.append(transcriber)
     book.package_document.meta_data.descriptions.append(description)
     volume.generate()
     return volume

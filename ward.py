@@ -37,7 +37,6 @@ def generate_epub(path=None):
               'sentiment, a second golden age?  Or will she stand tall as a gilded dark '
               'age dawns?')
     book.package_document.meta_data.creators.append(creator)
-    book.package_document.meta_data.contributors.append(transcriber)
     book.package_document.meta_data.descriptions.append(description)
     volume.generate()
     return volume
