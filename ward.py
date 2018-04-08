@@ -10,7 +10,7 @@ def generate_epub(path=None):
         url='https://www.parahumans.net/2017/10/21/glow-worm-0-1/')
     book = epub.Book(first_chapter=first_chapter)
     book.title = 'Ward'
-    volume = epub.EPub()
+    volume = epub.EPub(path=path)
     volume.books.append(book)
     creator = epub.meta.Creator(value='J.C. McCrae',
                                 file_as='McCrae, J.C.',

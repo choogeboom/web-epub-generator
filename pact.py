@@ -11,7 +11,7 @@ def generate_epub(path=None):
         url='https://pactwebserial.wordpress.com/2013/12/17/bonds-1-1/')
     book = epub.Book(first_chapter=first_chapter)
     book.title = 'Pact'
-    volume = epub.EPub()
+    volume = epub.EPub(path=path)
     volume.books.append(book)
     creator = epub.meta.Creator(value='J.C. McCrae',
                                 file_as='McCrae, J.C.',
