@@ -16,10 +16,6 @@ def generate_epub(path=None):
                                 file_as='McCrae, J.C.',
                                 scheme='marc:relators',
                                 role='aut')
-    transcriber = epub.meta.Contributor(value='Christopher Hoogeboom',
-                                        file_as='Hoogeboom, Christopher',
-                                        scheme='marc:relators',
-                                        role='trc')
     description = epub.meta.Description(
         value='The unwritten rules that govern the fights and outright wars between '
               '‘capes’ have been amended: everyone gets their second chance.  It’s an '

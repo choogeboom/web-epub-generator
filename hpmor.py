@@ -12,10 +12,6 @@ def generate_epub(path=None):
                                 file_as='Yudkowsky, Eliezer',
                                 scheme='marc:relators',
                                 role='aut')
-    transcriber = epub.meta.Contributor(value='Christopher Hoogeboom',
-                                        file_as='Hoogeboom, Christopher',
-                                        scheme='mark:relators',
-                                        role='trc')
     description = epub.meta.Description(value='Petunia married a biochemist, and Harry '
                                               'grew up reading science and science '
                                               'fiction. Then came the Hogwarts letter, '

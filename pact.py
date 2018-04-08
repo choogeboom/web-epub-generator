@@ -17,10 +17,6 @@ def generate_epub(path=None):
                                 file_as='McCrae, J.C.',
                                 scheme='marc:relators',
                                 role='aut')
-    transcriber = epub.meta.Contributor(value='Christopher Hoogeboom',
-                                        file_as='Hoogeboom, Christopher',
-                                        scheme='marc:relators',
-                                        role='trc')
     description = epub.meta.Description(
         value='Blake Thorburn was driven away from home and family by a '
               'vicious fight over inheritance, returning only for a deathbed '
