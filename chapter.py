@@ -49,6 +49,8 @@ class WildbowChapter(epub.WebChapter):
             self.parsed_html.find(name='div', class_='entry-content'))
         start_tag = content_div.find(string=wildbow_chapter_regex).find_parent('p')
         for current_tag in start_tag.next_siblings:
+            if current_tag == '\n':
+                continue
             if current_tag.find('a') and current_tag.find(string=wildbow_chapter_regex):
                 return None
             else:
