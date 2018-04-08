@@ -1,6 +1,7 @@
 """
 For building and editing EPUB books
 """
+import pathlib
 from typing import Sequence
 
 import bs4
@@ -295,7 +296,7 @@ class EPub(util.SetGet):
         self.path = None
         self.set(**kwargs)
         if self.path is None:
-            self.path = os.path.expanduser('~/generated_epubs')
+            self.path = pathlib.Path(os.path.expanduser('~/generated_epubs'))
 
     @property
     def mimetype(self):
@@ -317,27 +318,27 @@ class EPub(util.SetGet):
     @property
     def root_dir(self):
         title = self.books[0].title.casefold()
-        return "{}/{}".format(self.path, re.sub("[^a-z0-9]", "_", title))
+        return self.path / re.sub("[^a-z0-9]", "_", title)
 
     @property
     def meta_inf_dir(self):
-        return "{}/{}".format(self.root_dir, "META-INF")
+        return self.root_dir / 'META-INF'
 
     @property
     def content_dir(self):
-        return "{}/{}".format(self.root_dir, "CONTENT")
+        return self.root_dir / 'CONTENT'
 
     @property
     def text_dir(self):
-        return "{}/{}".format(self.content_dir, "Text")
+        return self.content_dir / 'Text'
 
     @property
     def images_dir(self):
-        return "{}/{}".format(self.content_dir, "Images")
+        return self.content_dir / 'Images'
 
     @property
     def styles_dir(self):
-        return "{}/{}".format(self.content_dir, "Styles")
+        return self.content_dir / 'Styles'
 
     def generate(self):
         self.create_directory_structure()
@@ -349,11 +350,11 @@ class EPub(util.SetGet):
     def create_directory_structure(self):
         shutil.rmtree(self.root_dir, ignore_errors=True)
         for directory in self.directories:
-            os.makedirs(directory, exist_ok=True)
+            directory.mkdir(parents=True, exist_ok=True)
 
     def write_mimetype(self):
-        mimetype_file = "{}/{}".format(self.root_dir, "mimetype")
-        with open(mimetype_file, 'w') as f:
+        mimetype_path = self.root_dir / 'mimetype'
+        with open(mimetype_path, 'w') as f:
             print("application/epub+zip", file=f)
 
     def process_books(self):
@@ -364,12 +365,12 @@ class EPub(util.SetGet):
             book.process()
 
     def write_container(self):
-        container_file = "{}/{}".format(self.meta_inf_dir, "container.xml")
-        with open(container_file, 'w') as f:
+        container_path = self.meta_inf_dir / 'container.xml'
+        with open(container_path, 'w') as f:
             print(str(self.container), file=f)
 
     def compress(self):
-        zip_name = shutil.make_archive(self.root_dir, 'zip', self.root_dir)
+        zip_name = shutil.make_archive(str(self.root_dir), 'zip', self.root_dir)
         shutil.move(zip_name, '{}.epub'.format(self.root_dir))
         shutil.rmtree(self.root_dir, ignore_errors=True)
 
@@ -551,10 +552,11 @@ class Chapter(util.SetGet, metaclass=abc.ABCMeta):
 
     @property
     def path(self):
-        return 'Text/chapter_{:03}.xhtml'.format(self.number)
+        fixed_title = re.sub(r'\W', '_', self.title)
+        return f'Text/chapter_{self.number:03}_{fixed_title}.xhtml'
 
     @property
-    def title(self) -> bs4.Tag:
+    def title(self) -> str:
         """
         The title Tag of the chapter
         """
@@ -569,27 +571,27 @@ class Chapter(util.SetGet, metaclass=abc.ABCMeta):
 
     def create_document(self) -> bs4.BeautifulSoup:
         """Create and return a BeautifulSoup document containing the chapter"""
-        doc = bs4.BeautifulSoup(WebChapter._DEFAULT_XHTML, "xml")
+        doc = bs4.BeautifulSoup(Chapter._DEFAULT_XHTML, "xml")
         doc.head.title.string = self.title
         doc.body.h1.string = self.title
         for item in self.content:
             doc.body.append(copy.copy(item))
         return doc
 
-    def write(self, base_directory: str):
+    def write(self, base_directory: pathlib.Path):
         """
         Write the chapter to a file
 
         :param base_directory: where to write the chapter
         """
         doc = self.create_document()
-        file_name = '{}/{}'.format(base_directory, self.path)
+        file_name = base_directory / self.path
         print('Writing Chapter "{}" as "{}".'.format(self.title, file_name))
-        with open(file_name, 'w') as f:
+        with open(file_name, 'w', encoding='UTF-8') as f:
             print(doc.prettify(formatter="minimal"), file=f)
 
     @abc.abstractmethod
-    def get_title(self) -> bs4.Tag:
+    def get_title(self) -> str:
         """Return the title of the chapter"""
         pass
 
