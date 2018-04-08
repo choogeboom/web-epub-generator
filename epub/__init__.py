@@ -1,6 +1,8 @@
 """
 For building and editing EPUB books
 """
+from typing import Sequence
+
 import bs4
 import os
 import re
@@ -559,7 +561,7 @@ class Chapter(util.SetGet, metaclass=abc.ABCMeta):
         return self.get_title()
 
     @property
-    def content(self) -> bs4.Tag:
+    def content(self) -> Sequence[bs4.Tag]:
         """
         The content tag that contains all the chapter text
         """
@@ -570,7 +572,8 @@ class Chapter(util.SetGet, metaclass=abc.ABCMeta):
         doc = bs4.BeautifulSoup(WebChapter._DEFAULT_XHTML, "xml")
         doc.head.title.string = self.title
         doc.body.h1.string = self.title
-        doc.body.append(copy.copy(self.content))
+        for item in self.content:
+            doc.body.append(copy.copy(item))
         return doc
 
     def write(self, base_directory: str):
@@ -586,7 +589,7 @@ class Chapter(util.SetGet, metaclass=abc.ABCMeta):
             print(doc.prettify(formatter="minimal"), file=f)
 
     @abc.abstractmethod
-    def get_title(self) -> str:
+    def get_title(self) -> bs4.Tag:
         """Return the title of the chapter"""
         pass
 
