@@ -30,6 +30,7 @@ def generate_epub(path=None):
     volume.generate()
     return volume
 
+
 if __name__ == "__main__":
     generate_epub()
 
