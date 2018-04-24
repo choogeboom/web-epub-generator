@@ -10,7 +10,6 @@ import re
 import abc
 import copy
 import shutil
-import urllib.parse
 from epub import meta
 from epub import util
 
@@ -605,70 +604,6 @@ class Chapter(util.SetGet, metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def __next__(self):
-        pass
-
-
-class WebChapter(Chapter):
-    """
-    Retrieves chapter content from the web
-    """
-
-    def __init__(self, url, **kwargs):
-        self.url = url
-        self.raw_html = None
-        self.parsed_html = None
-        self.set(**kwargs)
-        if self.raw_html is None:
-            self.load_html()
-        if self.parsed_html is None:
-            self.parsed_html = bs4.BeautifulSoup(self.raw_html, 'lxml')
-
-    @property
-    def next_chapter_url(self):
-        """
-        The URL of the next chapter
-        """
-        return self.get_next_chapter_url()
-
-    def load_html(self, url=None):
-        if url is None:
-            url = self.url
-        else:
-            self.url = url
-        self.raw_html = util.read_html(url)
-
-    def fix_url(self, raw_url: str) -> str:
-        """
-        Fix the URL if it is a relative URL
-
-        :param raw_url: the raw url to fix
-        :return: An absolute URL
-        """
-        if raw_url is not None and len(raw_url) > 2 and raw_url[0:2] == "..":
-            return urllib.parse.urljoin(self.url, raw_url)
-        else:
-            return raw_url
-
-    def __next__(self):
-        url = self.fix_url(self.get_next_chapter_url())
-        if url is None or len(url) == 0:
-            raise StopIteration
-        else:
-            return self.__class__(url)
-
-    @abc.abstractmethod
-    def get_next_chapter_url(self) -> str:
-        """Return the URL of the next chapter"""
-        pass
-
-    @abc.abstractmethod
-    def get_title(self) -> str:
-        """Return the title of the chapter"""
-        pass
-
-    @abc.abstractmethod
-    def get_content(self) -> bs4.Tag:
-        """Return the content of the chapter"""
         pass
 
 
