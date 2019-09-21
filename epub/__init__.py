@@ -2,7 +2,7 @@
 For building and editing EPUB books
 """
 import pathlib
-from typing import Sequence
+from typing import Sequence, ClassVar, List, Optional
 
 import bs4
 import os
@@ -10,23 +10,22 @@ import re
 import abc
 import copy
 import shutil
+
+import dataclasses
+
 from epub import meta
 from epub import util
 
 
+@dataclasses.dataclass()
 class Container:
     """
     The container represents an XML file that is used to point to various renditions of a
     book.
     """
-
-    def __init__(self, root_files=None):
-        if root_files is None:
-            self.root_files = []
-        else:
-            self.root_files = root_files
-        self.version = "1.0"
-        self.xmlns = "urn:oasis:names:tc:opendocument:xmlns:container"
+    root_files: List[str] = dataclasses.field(default_factory=list)
+    version: str = "1.0"
+    xmlns: str = "urn:oasis:names:tc:opendocument:xmlns:container"
 
     def register_rendition(self, file: str):
         """
@@ -35,7 +34,7 @@ class Container:
         """
         self.root_files.append(file)
 
-    def to_document(self):
+    def to_document(self) -> bs4.BeautifulSoup:
         """
         Turn the container into an XML document
         :return: The container document in a bs4.BeautifulSoup object
@@ -55,6 +54,7 @@ class Container:
         return self.to_document().prettify()
 
 
+@dataclasses.dataclass()
 class PackageDocument:
     """
     Represents the package document in the EPUB
@@ -62,6 +62,14 @@ class PackageDocument:
     The package element is the root container of the Package Document and encapsulates
     metadata and resource information for a Rendition.
     """
+    version: str = "3.0"
+    unique_identifier = "BookID"
+    prefix: Optional[str] = None
+    language: Optional[str] = None
+    text_direction: Optional[str] = None
+    id: Optional[str] = None
+    meta_data: meta.MetaData = dataclasses.field(default_factory=meta.MetaData)
+    manifest: "Manifest" = dataclasses.field(default_factory=Manifest)
 
     def __init__(self):
         self.version = "3.0"
@@ -534,11 +542,12 @@ class TableOfContents:
             print(doc_v3.prettify(formatter="html"), file=f)
 
 
+@dataclasses.dataclass()
 class Chapter(util.SetGet, metaclass=abc.ABCMeta):
     """
     Stores chapter data
     """
-    _DEFAULT_XHTML = '\
+    _DEFAULT_XHTML: ClassVar[str] = '\
         <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">\
           <head><title></title><link rel="stylesheet" ' \
                      'href="../Styles/default_style.css" type="text/css"/></head>\
@@ -546,11 +555,10 @@ class Chapter(util.SetGet, metaclass=abc.ABCMeta):
         </html>\
         '
 
-    def __init__(self, number=0):
-        self.number = number
+    number: int = 0
 
     @property
-    def path(self):
+    def path(self) -> str:
         fixed_title = re.sub(r'\W', '_', self.title)
         return f'Text/chapter_{self.number:03}_{fixed_title}.xhtml'
 
