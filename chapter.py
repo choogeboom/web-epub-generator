@@ -2,7 +2,6 @@
 Chapters for specific web serials
 """
 import abc
-import copy
 import re
 import urllib.parse
 from typing import Sequence
@@ -18,6 +17,7 @@ class WebChapter(Chapter):
     """
 
     def __init__(self, url, **kwargs):
+        super().__init__(self)
         self.url = url
         self.raw_html = None
         self.parsed_html = None
