@@ -38,9 +38,23 @@ class MetaData(util.SetGet):
         metadata = soup.new_tag("metadata")
         metadata["xmlns:dc"] = "http://purl.org/dc/elements/1.1/"
         parent.append(metadata)
-        prop_names = ['titles', 'creators', 'identifiers', 'contributors', 'coverages',
-                      'dates',  'descriptions', 'formats', 'languages', 'publishers',
-                      'relations', 'rights', 'sources', 'subjects', 'types']
+        prop_names = [
+            "titles",
+            "creators",
+            "identifiers",
+            "contributors",
+            "coverages",
+            "dates",
+            "descriptions",
+            "formats",
+            "languages",
+            "publishers",
+            "relations",
+            "rights",
+            "sources",
+            "subjects",
+            "types",
+        ]
         for prop_name in prop_names:
             self.append_property(prop_name, metadata, soup)
         modified_tag = soup.new_tag("meta")
@@ -64,7 +78,7 @@ class MetaDataProperty(util.SetGet):
     Base class for all meta-data items
     """
 
-    _main_tag_name = 'default'
+    _main_tag_name = "default"
 
     def __init__(self, **kwargs):
         self.value = ""
@@ -103,29 +117,22 @@ class MetaDataProperty(util.SetGet):
         if self.alternative_script is None:
             return
         as_tag = soup.new_tag(
-                              name="meta",
-                              property="alternative-script",
-                              refines=self.id)
+            name="meta", property="alternative-script", refines=self.id
+        )
         parent.append(as_tag)
         as_tag.append(bs4.NavigableString(self.alternative_script))
 
     def append_display_seq(self, parent, soup):
         if self.display_seq is None:
             return
-        tag = soup.new_tag(
-                           name="meta",
-                           property="display-seq",
-                           refines=self.id)
+        tag = soup.new_tag(name="meta", property="display-seq", refines=self.id)
         parent.append(tag)
         tag.append(bs4.NavigableString(str(self.display_seq)))
 
     def append_file_as(self, parent, soup):
         if self.file_as is None:
             return
-        tag = soup.new_tag(
-                           name="meta",
-                           property="file-as",
-                           refines=self.id)
+        tag = soup.new_tag(name="meta", property="file-as", refines=self.id)
         parent.append(tag)
         tag.append(bs4.NavigableString(self.file_as))
 
@@ -146,7 +153,7 @@ class Person(MetaDataProperty):
     Base class for Creator and Contributor
     """
 
-    _main_tag_name = 'person'
+    _main_tag_name = "person"
 
     def __init__(self, **kwargs):
         self.role = None
@@ -172,7 +179,7 @@ class Collection(MetaDataProperty):
     identifies the name of a collection to which the EPUB Publication belongs.
     """
 
-    _main_tag_name = 'meta'
+    _main_tag_name = "meta"
 
     def __init__(self, **kwargs):
         self.type = None
@@ -236,7 +243,7 @@ class Contributor(Person):
                 entity.
     """
 
-    _main_tag_name = 'dc:contributor'
+    _main_tag_name = "dc:contributor"
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -259,7 +266,7 @@ class Coverage(MetaDataProperty):
     References:	[TGN] http://www.getty.edu/research/tools/vocabulary/tgn/index.html
     """
 
-    _main_tag_name = 'dc:coverage'
+    _main_tag_name = "dc:coverage"
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -273,7 +280,7 @@ class Creator(Person):
                 Typically, the name of a Creator should be used to indicate the entity.
     """
 
-    _main_tag_name = 'dc:creator'
+    _main_tag_name = "dc:creator"
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -290,7 +297,7 @@ class Date(MetaDataProperty):
     References:	[W3CDTF] http://www.w3.org/TR/NOTE-datetime
     """
 
-    _main_tag_name = 'dc:date'
+    _main_tag_name = "dc:date"
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -309,7 +316,7 @@ class Description(MetaDataProperty):
                 resource.
     """
 
-    _main_tag_name = 'dc:description'
+    _main_tag_name = "dc:description"
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -326,7 +333,7 @@ class Format(MetaDataProperty):
     References:	[MIME] http://www.iana.org/assignments/media-types/
     """
 
-    _main_tag_name = 'dc:format'
+    _main_tag_name = "dc:format"
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -340,7 +347,7 @@ class Identifier(MetaDataProperty):
                 string conforming to a formal identification system.
     """
 
-    _main_tag_name = 'dc:identifier'
+    _main_tag_name = "dc:identifier"
 
     def __init__(self, **kwargs):
         self.type = None
@@ -354,9 +361,9 @@ class Identifier(MetaDataProperty):
     def append_type(self, parent, soup):
         if self.type is None:
             return
-        tag = soup.new_tag('meta', property='identifier-type', refines=self.id)
+        tag = soup.new_tag("meta", property="identifier-type", refines=self.id)
         if self.scheme is not None:
-            tag['scheme'] = self.scheme
+            tag["scheme"] = self.scheme
         tag.append(bs4.NavigableString(str(self.type)))
         parent.append(tag)
 
@@ -372,7 +379,7 @@ class Language(MetaDataProperty):
                 https://tools.ietf.org/html/rfc5646
     """
 
-    _main_tag_name = 'dc:language'
+    _main_tag_name = "dc:language"
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -386,7 +393,7 @@ class Publisher(MetaDataProperty):
                 Typically, the name of a Publisher should be used to indicate the entity.
     """
 
-    _main_tag_name = 'dc:publisher'
+    _main_tag_name = "dc:publisher"
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -400,7 +407,7 @@ class Relation(MetaDataProperty):
                 a string conforming to a formal identification system.
     """
 
-    _main_tag_name = 'dc:relation'
+    _main_tag_name = "dc:relation"
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -415,7 +422,7 @@ class Rights(MetaDataProperty):
                 rights.
     """
 
-    _main_tag_name = 'dc:rights'
+    _main_tag_name = "dc:rights"
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -431,7 +438,7 @@ class Source(MetaDataProperty):
                 system.
     """
 
-    _main_tag_name = 'dc:source'
+    _main_tag_name = "dc:source"
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -446,7 +453,7 @@ class Subject(MetaDataProperty):
                 vocabulary.
     """
 
-    _main_tag_name = 'dc:subject'
+    _main_tag_name = "dc:subject"
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -459,7 +466,7 @@ class Title(MetaDataProperty):
     Comment:	Typically, a Title will be a name by which the resource is formally known.
     """
 
-    _main_tag_name = 'dc:title'
+    _main_tag_name = "dc:title"
 
     def __init__(self, **kwargs):
         self.type = None
@@ -472,10 +479,7 @@ class Title(MetaDataProperty):
         parent.append(tag)
         tag.append(bs4.NavigableString(self.value))
         if self.type is not None:
-            tag = soup.new_tag(
-                               "meta",
-                               refines=self.id,
-                               property="title-type")
+            tag = soup.new_tag("meta", refines=self.id, property="title-type")
             parent.append(tag)
             tag.append(bs4.NavigableString(self.type))
 
@@ -492,7 +496,7 @@ class Type(MetaDataProperty):
                 http://www.idpf.org/epub/vocab/package/types/
     """
 
-    _main_tag_name = 'dc:type'
+    _main_tag_name = "dc:type"
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
