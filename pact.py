@@ -12,7 +12,7 @@ def generate_epub(path=None):
     )
     book = epub.Book(first_chapter=first_chapter)
     book.title = "Pact"
-    volume = epub.EPub(path=path)
+    volume = epub.EPub() if path is None else epub.EPub(path=path)
     volume.books.append(book)
     creator = epub.meta.Creator(
         value="J.C. McCrae", file_as="McCrae, J.C.", scheme="marc:relators", role="aut"
