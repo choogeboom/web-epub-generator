@@ -12,6 +12,7 @@ from typing import (
     TypeVar,
     MutableSequence,
     Union,
+    overload,
 )
 
 import bs4
@@ -278,11 +279,11 @@ class Chapter(util.SetGet, abc.ABC):
         """Return the content of the chapter"""
         pass
 
-    def __iter__(self: T) -> Iterator[T]:
+    def __iter__(self: T) -> T:
         return self
 
     @abc.abstractmethod
-    def __next__(self: T) -> T:
+    def __next__(self) -> "Chapter":
         pass
 
 
@@ -301,7 +302,7 @@ class TitleChapter(Chapter):
         return bs4.Tag(name="div")
 
 
-class Book(util.SetGet):
+class Book:
     """
     An iterable class for chapters a book
     """
@@ -311,7 +312,7 @@ class Book(util.SetGet):
         first_chapter: Chapter,
         package_document: Optional["PackageDocument"] = None,
         table_of_contents: Optional["TableOfContents"] = None,
-        base_path: Optional[str] = None,
+        base_path: pathlib.Path = pathlib.Path(""),
         specific_path: str = "content.opf",
     ):
         self.package_document = (
@@ -357,15 +358,23 @@ class Book(util.SetGet):
         self._current_chapter_index = -1
         return self
 
-    def __getitem__(self, item: Union[slice, int]) -> Chapter:
+    @overload
+    def __getitem__(self, item: int) -> Chapter:
+        ...
+
+    @overload
+    def __getitem__(self, item: slice) -> List[Chapter]:
+        ...
+
+    def __getitem__(self, item: Union[slice, int]) -> Union[List[Chapter], Chapter]:
         if isinstance(item, slice):
-            max_index = item.stop - 1
+            max_index: int = item.stop - 1 if item.stop else 0
         elif isinstance(item, int):
             max_index = item
         else:
-            raise TypeError
+            raise TypeError(f"Illegal index type: {type(item)}")
 
-        while max_index >= len(self._chapters) or item < 0:
+        while max_index >= len(self._chapters) or max_index < 0:
             try:
                 self._chapters.append(next(self._chapters[-1]))
             except StopIteration:
@@ -466,14 +475,14 @@ class TableOfContents:
         li.append(a)
         a.append(bs4.NavigableString(chapter.title))
 
-    def write(self, base_dir: str) -> None:
+    def write(self, base_dir: pathlib.Path) -> None:
         doc_v2 = self.generate_version_2_document()
-        file_name = "{}/{}".format(base_dir, self.path_v2)
+        file_name = base_dir / self.path_v2
         print('Writing Table of Contents as "{}".'.format(file_name))
         with open(file_name, "w") as f:
             print(doc_v2.prettify(formatter="html"), file=f)
         doc_v3 = self.generate_version_3_document()
-        file_name = "{}/{}".format(base_dir, self.path_v3)
+        file_name = base_dir / self.path_v3
         print('Writing Table of Contents as "{}".'.format(file_name))
         with open(file_name, "w") as f:
             print(doc_v3.prettify(formatter="html"), file=f)
@@ -487,7 +496,7 @@ class Spine:
     """
 
     id: Optional[str] = None
-    toc: Optional[TableOfContents] = None
+    toc: Optional[str] = None
     page_progression_direction: Optional[str] = None
     itemrefs: List[ItemRef] = dataclasses.field(default_factory=list)
 
@@ -559,9 +568,9 @@ class PackageDocument(util.Documentable):
         self.spine.append_to_document(pack, soup)
         return soup
 
-    def write(self, base_dir: str) -> None:
+    def write(self, base_dir: pathlib.Path) -> None:
         doc = self.to_document()
-        file_name = "{}/{}".format(base_dir, self.path)
+        file_name = base_dir / self.path
         with open(file_name, "w") as f:
             print(doc.prettify(formatter="html"), file=f)
 
