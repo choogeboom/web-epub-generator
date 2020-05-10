@@ -102,7 +102,7 @@ class WildbowChapter(WebChapter):
     A Chapter for any of the web serials by J.C. McCrae (AKA Wildbow)
     """
 
-    chapter_regex = re.compile(r"(Last|Next)")
+    chapter_regex = re.compile(r"(Last|Next|Previous)")
 
     def __init__(self, url: str, **kwargs):
         super().__init__(url, **kwargs)
@@ -112,8 +112,12 @@ class WildbowChapter(WebChapter):
         return re.sub(r"\n", " ", raw_title)
 
     def get_content(self) -> Sequence[bs4.Tag]:
-        content_div = self.parsed_html.find(name="div", class_="entry-content")
-        start_tag = content_div.find(string=self.chapter_regex).find_parent("p")
+        content_div: bs4.Tag = self.parsed_html.find(name="div", class_="entry-content")
+        try:
+            start_tag = content_div.find(string=self.chapter_regex).find_parent("p")
+        except AttributeError:
+            yield from content_div.children
+            return None
         for current_tag in start_tag.next_siblings:
             if current_tag == "\n":
                 continue
